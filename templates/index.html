@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OncoAI | Cancer Detection Dashboard</title>
+
+    <!-- LINKING CSS CORRECTLY -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- TITLE -->
+    <h1>🧬 OncoAI</h1>
+    <p class="subtitle">AI-Based Early Cancer Detection System</p>
+
+    <!-- ABOUT ONCOAI -->
+    <div class="about-box">
+        <h2>About OncoAI</h2>
+        <p>
+            OncoAI is an artificial intelligence powered medical decision-support system
+            designed to assist doctors and researchers in the early detection of cancer
+            using Mammography images.
+        </p>
+        <p>
+            The system analyzes microscopic tissue images and classifies them as
+            <strong>Cancerous</strong> or <strong>Non-Cancerous</strong>,
+            helping in faster and more reliable diagnosis.
+        </p>
+        <p class="disclaimer">
+            ⚠ This system is for educational and research purposes only and does not
+            replace professional medical diagnosis.
+        </p>
+    </div>
+
+    <!-- CANCER DETECTION -->
+    <div class="detect-box">
+        <h2>Cancer Detection</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label>Upload Mammography Image</label>
+            <input type="file" name="image" required>
+            <button type="submit">Analyze Image</button>
+        </form>
+
+        <!-- RESULT -->
+        {% if prediction %}
+        <div class="result-box">
+            <p class="result {{ prediction }}">
+                {{ prediction }}
+            </p>
+
+            <p class="confidence">
+                Model Confidence: {{ confidence }}%
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- MEDICAL GUIDANCE -->
+    {% if prediction %}
+    <div class="guidance-box">
+        <h2>Medical Guidance</h2>
+
+        {% if prediction == "Non-Cancerous" %}
+            <p>
+                The tissue sample appears to be <strong>Non-Cancerous</strong>.
+                This indicates no malignant cell growth at the time of analysis.
+            </p>
+            <ul>
+                <p>some steps to maintain a cancer free life:</p>
+                <li>Maintain a healthy and balanced diet</li>
+                <li>Exercise regularly</li>
+                <li>Avoid smoking and alcohol</li>
+                <li>Go for routine medical check-ups</li>
+            </ul>
+        {% else %}
+            <p>
+                The tissue sample appears to be <strong>Cancerous</strong>,
+                indicating abnormal and uncontrolled cell growth.
+            </p>
+            <ul>
+                <p>what to do next:</p>
+                <li>Consult an oncologist immediately</li>
+                <li>Undergo confirmatory diagnostic tests</li>
+                <li>Discuss treatment options with healthcare professionals</li>
+                <li>Follow prescribed medical guidance strictly</li>
+                <p>Do not PANIC Breast cancer is treatable in most cases, with early-stage (localized) diagnoses having excellent outcomes near 100% survival rates</p>
+                
+            </ul>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

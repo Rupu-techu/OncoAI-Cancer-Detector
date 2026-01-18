@@ -1,0 +1,112 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f8fb;
+    margin: 0;
+}
+
+.container {
+    width: 50%;
+    margin: auto;
+    padding: 30px;
+}
+
+h1 {
+    text-align: center;
+    color: #0a3d62;
+}
+
+.subtitle {
+    text-align: center;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+/* ABOUT */
+.about-box {
+    background-color: #e8f3fb;
+    padding: 25px;
+    border-left: 6px solid #0a3d62;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+/* DETECTION */
+.detect-box {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+label {
+    font-weight: bold;
+}
+
+input[type=file] {
+    width: 100%;
+    margin: 10px 0 15px;
+}
+
+button {
+    background-color: #0a3d62;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #083255;
+}
+
+/* RESULT */
+.result-box {
+    margin-top: 20px;
+    background-color: #f4f8fb;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.preview {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.result {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.Cancerous {
+    color: red;
+}
+
+.Non-Cancerous {
+    color: green;
+}
+
+.confidence {
+    font-size: 16px;
+}
+
+
+.guidance-box {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    border-left: 6px solid #2e86de;
+}
+
+.guidance-box ul {
+    margin-top: 10px;
+}
+
+.disclaimer {
+    font-size: 14px;
+    color: #a00;
+}
