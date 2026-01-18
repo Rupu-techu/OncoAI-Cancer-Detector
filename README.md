@@ -4,7 +4,7 @@
 This project is a **Machine Learning–based Cancer Prediction System** with a **web interface** built using **Flask**.
 
 **Currently implemented for Breast Cancer prediction**  
-**Designed to be extended to other cancer types** such as lung, skin, prostate, etc.
+**Designed to be extended to other cancer types** such as lung, skin etc.
 
 The system focuses on building a **scalable ML pipeline** that can support multiple cancer datasets and prediction models in the future.
 
