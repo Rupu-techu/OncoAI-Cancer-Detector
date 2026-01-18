@@ -21,12 +21,12 @@ The objective of this project is to:
 
 ##  Key Features
 
-- ✔ Machine Learning–based cancer prediction
-- ✔ Modular design (easy to add new cancer types)
-- ✔ Feature scaling and dimensionality reduction (PCA)
-- ✔ Flask-based web application
-- ✔ User-friendly interface for predictions
-- ✔ Clean and professional project structure
+-  Machine Learning–based cancer prediction
+-  Modular design (easy to add new cancer types)
+-  Feature scaling and dimensionality reduction (PCA)
+-  Flask-based web application
+-  User-friendly interface for predictions
+-  Clean and professional project structure
 
 ---
 
