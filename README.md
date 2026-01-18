@@ -1,4 +1,5 @@
 # OncoAI-Cancer-Detector
+
  CANCER PREDICTION WEB APPLICATION (Extensible ML System)
 
 This project is a **Machine Learning–based Cancer Prediction System** with a **web interface** built using **Flask**.
@@ -28,11 +29,10 @@ The objective of this project is to:
 -  User-friendly interface for predictions
 -  Clean and professional project structure
 
----
 
 ##  Current Implementation
 
-### Supported Cancer Type (Current)
+### Supported Cancer Type 
 - **Breast Cancer**
   - Based on structured clinical / extracted features
   - Supervised classification model
@@ -44,38 +44,34 @@ The objective of this project is to:
 
 The architecture allows new datasets and models to be added with minimal changes.
 
----
-
 ##  Project Structure
 
 cancer-prediction-project/
 │
-├── app.py # Flask web application
-├── train_model.py # Model training script
-├── save_dataset.py # Dataset preprocessing
-├── organize_images.py # Image organization utility
-├── requirements.txt # Required Python libraries
-├── README.md # Project documentation
+├── app.py 
+├── train_model.py 
+├── save_dataset.py 
+├── organize_images.py
+├── requirements.txt 
+├── README.md 
 ├── .gitignore
 │
-├── notebook/ # Jupyter notebooks (experiments)
-├── scripts/ # Helper scripts
-├── templates/ # HTML files (Flask frontend)
-├── static/ # CSS / static assets
+├── notebook/ 
+├── scripts/ 
+├── templates/
+├── static/
 
 
 ## Dataset Information
 
 Due to **GitHub file size limits**, datasets and trained model files are **not included** in this repository.
 
-### Datasets Used (Current)
+### Datasets Used 
 - **Breast Cancer Wisconsin Dataset**
 - **BreaKHis Histopathological Image Dataset**
 
 Datasets can be obtained from:
 - https://www.kaggle.com/
-
----
 
 ## Note on Large Files
 
@@ -85,11 +81,35 @@ The following files/folders are intentionally excluded:
 - `.pkl` trained model files
 
 These files are generated locally during training and are not required to understand the project structure.
+## Demo Video 
 
-## Model Training (Optional)
+A full working demonstration of the web application is available in the video below:
 
+## Running and Using the Web Application
+
+This project includes a Flask-based web interface that can be executed locally using **Visual Studio Code**.  
+The application runs on a local server and can be accessed through a web browser.
+
+### Execution Environment
+- The application is developed and tested using **Visual Studio Code**
+- Python is used as the backend runtime
+- Flask is used to serve the web interface
+
+### How the Website is Accessed
+
+1. The project folder is opened in **Visual Studio Code**
+2. Required Python dependencies are installed using the provided `requirements.txt`
+3. The Flask application is started by running `app.py`
+4. Once the server starts, the website becomes available on a local URL
+5. Users can open the URL in any web browser and interact with the application
+
+### Local Access URL
+
+When the application is running, it is accessible at:
+http://127.0.0.1:5000
+
+## Model Training 
 To preprocess data and train the model locally:
-
 ```bash
 python save_dataset.py
 python train_model.py
