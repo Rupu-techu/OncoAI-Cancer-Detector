@@ -84,6 +84,7 @@ These files are generated locally during training and are not required to unders
 ## Demo Video 
 
 A full working demonstration of the web application is available in the video below:
+https://drive.google.com/drive/u/0/folders/1ZmCdam4Bv4xaIsBR_XBkG1LW2_BRVmv8
 
 ## Running and Using the Web Application
 
