@@ -52,17 +52,29 @@ https://github.com/user-attachments/assets/bb45258a-3ba2-402d-8ed6-d07cc47073b5
 ---
 
 User Upload Image
+
 ↓
+
 Preprocessing (Resize, Normalize)
+
 ↓
+
 EfficientNet (Feature Extraction)
+
 ↓
+
 PCA (Dimensionality Reduction)
+
 ↓
+
 Random Forest Classifier
+
 ↓
+
 Prediction + Confidence
+
 ↓
+
 Report Generation (UI)
 
 
