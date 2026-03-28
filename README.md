@@ -25,18 +25,29 @@ OncoAI is a machine learning-based web application designed to assist in early c
 ## 🖼️ Website Preview
 
 ### 🔷 Dashboard
-![Dashboard Screenshot](assets/dashboard.png)
+
+
+<img width="1919" height="1031" alt="Screenshot 2026-03-28 142750" src="https://github.com/user-attachments/assets/7fdf3a85-1c78-4b34-8d0f-45b1d7f23fd6" />
 
 ---
 
 ### 📄 Report Page
-![Report Screenshot](assets/report.png)
+
+<img width="1919" height="872" alt="Screenshot 2026-03-28 142802" src="https://github.com/user-attachments/assets/0a19b222-f180-4c03-9fa4-30955d22ad44" />
 
 ---
 
 ## 🎥 Demo Video
 
-[![Watch the demo](assets/demo-thumbnail.png)](assets/demo-video.mp4)
+
+
+https://github.com/user-attachments/assets/bb45258a-3ba2-402d-8ed6-d07cc47073b5
+
+
+
+---
+
+## 🏗️ Project Architecture
 User Upload Image
 ↓
 Preprocessing (Resize, Normalize)
@@ -87,7 +98,7 @@ OncoAI-Cancer-Detector/
 ├── notebook/
 
 
----
+```
 
 ## 🚀 How to Run Locally
 
