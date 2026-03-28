@@ -68,7 +68,7 @@ Report Generation (UI)
 
 ## 📁 Project Structure
 
-
+```
 OncoAI-Cancer-Detector/
 │
 ├── app.py
@@ -125,6 +125,7 @@ Medical students
 Researchers
 Healthcare AI prototypes
 Early-stage screening tools
-💙 Acknowledgement
+
+ Acknowledgement
 
 Built with passion to contribute towards AI in healthcare.
