@@ -1,0 +1,62 @@
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Environments
+.env
+.env.*
+.venv/
+venv/
+env/
+
+# Packaging / build artifacts
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Model/data artifacts
+data/
+models/
+results/
+mammography/
+.torch_cache/
+torch_cache/
+*.pth
+*.pt
+*.pkl
+*.joblib
+*.npy
+*.npz
+
+# Uploaded / generated assets
+static/heatmaps/
+static/reports/
+static/uploads/
+
+# Media (raw datasets)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.tif
