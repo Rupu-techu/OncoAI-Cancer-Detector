@@ -155,9 +155,9 @@ Dataset and trained model files are not included due to size limitations.
 
 This system can assist:
 
-Medical students
-Researchers
-Healthcare AI prototypes
+Medical students,
+Researchers,
+Healthcare AI prototypes,
 Early-stage screening tools
 
 ---
