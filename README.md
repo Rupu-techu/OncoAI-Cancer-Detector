@@ -48,6 +48,9 @@ https://github.com/user-attachments/assets/bb45258a-3ba2-402d-8ed6-d07cc47073b5
 ---
 
 ## 🏗️ Project Architecture
+
+---
+
 User Upload Image
 ↓
 Preprocessing (Resize, Normalize)
