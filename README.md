@@ -132,10 +132,12 @@ python app.py
 
 ```
 
-## 🏗️ Project Architecture
- Important Note
+
+## Important Note
 
 Dataset and trained model files are not included due to size limitations.
+
+---
 
 🧠 Future Enhancements
 🔥 Grad-CAM visualization (Explainable AI)
@@ -152,6 +154,8 @@ Researchers
 Healthcare AI prototypes
 Early-stage screening tools
 
- Acknowledgement
+---
+
+ ## Acknowledgement
 
 Built with passion to contribute towards AI in healthcare.
