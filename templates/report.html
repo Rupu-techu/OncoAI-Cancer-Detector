@@ -14,7 +14,7 @@
 <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
     <div class="container">
         <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="{{ url_for('dashboard') }}">
-            <span class="brand-mark me-2">◎</span>
+            <span class="brand-mark me-2">?</span>
             <span>Onco AI</span>
             <span class="ms-2 slogan text-muted">Every Life Matters</span>
         </a>
@@ -29,22 +29,39 @@
                 <li class="nav-item">
                     <a class="nav-link active" href="{{ url_for('report') }}">Report</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('about') }}">About</a>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container py-4">
+<div class="container py-5 page-content">
+    <header class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="header-icon">
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <div>
+                <h1 class="mb-1">Report</h1>
+                <p class="text-muted mb-0">Upload a mammography image and review the AI-assisted result.</p>
+            </div>
+        </div>
+        <a class="btn btn-outline-primary" href="{{ url_for('about') }}">About OncoAI</a>
+    </header>
+
     <div class="row g-4">
-        <div class="col-lg-5">
-            <div class="card shadow-soft">
+        <div class="col-lg-5 d-flex flex-column gap-3">
+            <div class="card shadow-soft h-100">
                 <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="fa-solid fa-upload me-2"></i>Upload & Analyze</h5>
+                    <p class="eyebrow mb-1">Primary</p>
+                    <h4 class="mb-3">Upload & Analyze</h4>
                     <form id="upload-form" method="POST" enctype="multipart/form-data">
                         <div id="drop-zone" class="drop-zone">
                             <input type="file" name="image" id="image-input" accept="image/*" required>
-                            <p class="mb-1">Drag & drop or click to select an image</p>
-                            <span class="text-muted">Accepted: PNG, JPG, BMP</span>
+                            <p class="mb-1">Drag & drop or click to select</p>
+                            <span class="text-muted small">Accepted: PNG, JPG, BMP</span>
                         </div>
                         <div class="d-flex align-items-center gap-3 mt-3">
                             <button type="submit" class="btn btn-primary w-100">
@@ -55,114 +72,100 @@
                             </div>
                         </div>
                         <div class="preview mt-3">
+                            {% if result %}
+                            <div class="d-flex align-items-center mb-2 text-muted small">
+                                <i class="fa-regular fa-image me-2"></i>
+                                <span>Last uploaded image</span>
+                            </div>
+                            <img id="preview-img"
+                                 src="{{ url_for('static', filename='uploads/' + result.filename) }}"
+                                 alt="uploaded"
+                                 class="img-fluid rounded-3 shadow-sm">
+                            {% else %}
                             <img id="preview-img" src="#" alt="preview" class="d-none img-fluid rounded-3 shadow-sm">
+                            {% endif %}
                         </div>
                     </form>
                 </div>
             </div>
-
-            <div class="card shadow-soft mt-3">
-                <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="fa-solid fa-list-ol me-2"></i>How to Use</h5>
-                    <ol class="mb-0 ps-3">
-                        <li class="mb-2">Upload a histopathology image (PNG/JPG/BMP).</li>
-                        <li class="mb-2">Wait for the prediction, confidence, and risk meter.</li>
-                        <li class="mb-0">Review guidance and consult a clinician for decisions.</li>
-                    </ol>
-                </div>
-            </div>
-
-            <div class="card shadow-soft mt-3">
-                <div class="card-body">
-                    <h5 class="card-title mb-2"><i class="fa-solid fa-triangle-exclamation me-2"></i>Important</h5>
-                    <p class="mb-0 text-muted small">This report is a decision-support aid, not a definitive diagnosis. Clinical evaluation by a healthcare professional is required.</p>
-                </div>
-            </div>
-
-            {% if result %}
-            <div class="card shadow-soft mt-3">
-                <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="fa-solid fa-image me-2"></i>Uploaded Image</h5>
-                    <img src="{{ url_for('static', filename='uploads/' + result.filename) }}" class="img-fluid rounded-3 shadow-sm" alt="uploaded">
-                </div>
-            </div>
-            {% endif %}
         </div>
 
-        <div class="col-lg-7">
-            <div class="card shadow-soft mb-3">
+        <div class="col-lg-7 d-flex flex-column gap-3">
+            <div class="card shadow-soft big-result">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0"><i class="fa-solid fa-heart-pulse me-2"></i>Prediction</h5>
-                        {% if result %}
-                        <span class="badge {{ result.badge_class }}">{{ result.prediction }}</span>
-                        {% else %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">Result</p>
+                            <h4 class="mb-0">Prediction</h4>
+                        </div>
+                        {% if not result %}
                         <span class="badge bg-secondary">Awaiting upload</span>
                         {% endif %}
                     </div>
                     {% if result %}
-                        <p class="display-6 mb-1">{{ result.confidence }}%</p>
-                        <small class="text-muted">Confidence</small>
-                        <div class="mt-3">
-                            <p class="mb-1 fw-semibold">Cancer Risk</p>
-                            <div class="progress risk-bar">
-                                <div class="progress-bar {% if result.prediction=='Cancerous' %}bg-danger{% else %}bg-success{% endif %}"
-                                     role="progressbar"
-                                     style="width: {{ result.risk }}%;"
-                                     aria-valuenow="{{ result.risk }}" aria-valuemin="0" aria-valuemax="100">
-                                    {{ result.risk }}%
-                                </div>
+                    <div class="result-inline d-flex flex-wrap align-items-center gap-4">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <p class="h1 mb-0 {% if result.prediction=='Cancerous' %}text-danger{% else %}text-success{% endif %}">{{ result.prediction }}</p>
+                        </div>
+                        <div class="vr d-none d-lg-block" style="height:36px;"></div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <p class="label mb-0">Confidence</p>
+                            <p class="h2 mb-0">{{ result.confidence }}%</p>
+                        </div>
+                        <div class="vr d-none d-lg-block" style="height:36px;"></div>
+                        <div class="d-flex align-items-center gap-3 flex-wrap w-100 w-lg-auto">
+                            <div class="d-flex align-items-center gap-2">
+                                <p class="label mb-0">Risk</p>
+                                <p class="h2 mb-0">{{ result.risk }}%</p>
+                            </div>
+                            <div class="progress slim flex-grow-1" style="min-width:140px; max-width:240px;">
+                                <div class="progress-bar {% if result.prediction=='Cancerous' %}bg-danger{% else %}bg-success{% endif %}" style="width: {{ result.risk }}%;"></div>
                             </div>
                         </div>
+                    </div>
                     {% else %}
-                        <p class="text-muted mb-0">Upload an image to see analysis.</p>
+                    <p class="text-muted mb-0">Upload an image to see prediction, confidence, and risk.</p>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="card shadow-soft mb-3">
+            <div class="card shadow-soft">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Analysis Summary</h5>
-                    <p class="mb-2">{{ analysis.summary }}</p>
-                    <p class="mb-0 text-muted small">Contextual medical guidance is pulled from curated notes for the predicted class. This report is supportive and is not a definitive diagnosis; clinical evaluation is required.</p>
-                </div>
-            </div>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="card shadow-soft h-100">
-                        <div class="card-body">
-                            <h6><i class="fa-solid fa-virus me-2"></i>Possible Causes</h6>
-                            <ul class="mb-0">
+                    <h5 class="card-title mb-3">Recommendations</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <p class="label mb-1">Possible Causes</p>
+                            <ul class="mb-0 small text-muted">
                                 {% for c in analysis.causes %}<li>{{ c }}</li>{% endfor %}
                             </ul>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card shadow-soft h-100">
-                        <div class="card-body">
-                            <h6><i class="fa-solid fa-shield-heart me-2"></i>Precautions</h6>
-                            <ul class="mb-0">
+                        <div class="col-md-6">
+                            <p class="label mb-1">Precautions</p>
+                            <ul class="mb-0 small text-muted">
                                 {% for p in analysis.precautions %}<li>{{ p }}</li>{% endfor %}
                             </ul>
                         </div>
                     </div>
+                    <div class="mt-3">
+                        <p class="label mb-1">Recommended Actions</p>
+                        <ul class="mb-0 small text-muted">
+                            {% for a in analysis.actions %}<li>{{ a }}</li>{% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <div class="card shadow-soft my-3">
-                <div class="card-body">
-                    <h6><i class="fa-solid fa-list-check me-2"></i>Recommended Actions</h6>
-                    <ul class="mb-0">
-                        {% for a in analysis.actions %}<li>{{ a }}</li>{% endfor %}
-                    </ul>
-                </div>
-            </div>
+        </div>
+    </div>
 
-            <div class="card shadow-soft mb-3">
+    <div class="row g-3 mt-2">
+        <div class="col-12">
+            <div class="card shadow-soft">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">FAQ</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">FAQ</h5>
+                        <i class="fa-solid fa-circle-question text-primary"></i>
+                    </div>
                     <div class="accordion" id="faqAccordion">
                         {% for q, ans in analysis.faq %}
                         <div class="accordion-item">
@@ -172,19 +175,31 @@
                                 </button>
                             </h2>
                             <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">{{ ans }}</div>
+                                <div class="accordion-body small">{{ ans }}</div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="col-12">
             <div class="card shadow-soft">
                 <div class="card-body">
-                    <h5 class="card-title mb-2">About Onco AI</h5>
-                    <p class="mb-0">
-                        Onco AI assists clinicians with early detection of potential malignancies by combining modern CNN models with clinical context. Early detection improves treatment options and outcomes; always consult a licensed medical professional for diagnosis and care.
+                    <h5 class="card-title mb-2">What is OncoAI?</h5>
+                    <p class="mb-2 text-muted small">
+                        OncoAI is an AI-powered system designed to assist in the early detection of breast cancer by analyzing medical images. It uses deep learning and machine learning to spot patterns in tissue images and classify them as cancerous or non-cancerous.
+                    </p>
+                    <p class="mb-2 text-muted small">
+                        Along with the prediction, it provides a confidence score and risk estimation to help users understand results and take informed next steps.
+                    </p>
+                    <p class="mb-2 text-muted small">
+                        This tool is for assistance and education only.
+                    </p>
+                    <p class="mb-0 text-danger small fw-semibold d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        The results are not a final medical diagnosis and must always be reviewed and confirmed by a qualified healthcare professional.
                     </p>
                 </div>
             </div>
@@ -193,11 +208,56 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const dropZone = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("image-input");
+    const previewImg = document.getElementById("preview-img");
+    const spinner = document.getElementById("spinner");
+    const form = document.getElementById("upload-form");
+
+    const setFile = (file) => {
+        if (!file) return;
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewImg.classList.remove("d-none");
+        };
+        reader.readAsDataURL(file);
+    };
+
+    dropZone.addEventListener("click", () => fileInput.click());
+
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("shadow");
+    });
+
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("shadow"));
+
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("shadow");
+        const file = e.dataTransfer.files?.[0];
+        setFile(file);
+    });
+
+    fileInput.addEventListener("change", () => setFile(fileInput.files?.[0]));
+
+    form.addEventListener("submit", () => {
+        spinner.classList.remove("d-none");
+    });
+});
+</script>
 <footer class="footer mt-4 py-4">
     <div class="container">
         <div class="row g-3 align-items-center">
             <div class="col-md-4 d-flex align-items-center gap-2">
-                <span class="brand-mark">◎</span>
+                <span class="brand-mark">?</span>
                 <div>
                     <div class="fw-bold text-primary mb-1">Onco AI</div>
                     <div class="text-muted small">Every Life Matters</div>

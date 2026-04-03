@@ -26,4 +26,4 @@ for root, dirs, files in os.walk(original_dataset):
             # copy file
             shutil.copy2(src_path, dest_path)
 
-print("✅ Images organized into binary dataset (benign/malignant).")
+print(" Images organized into binary dataset (benign/malignant).")

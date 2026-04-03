@@ -80,95 +80,15 @@ app = Flask(__name__)
 app.secret_key = "oncoai-secret"
 app.config["UPLOAD_FOLDER"] = str(UPLOAD_FOLDER)
 
-ANALYSIS_DEFAULT = {
-    "summary": "AI reviewed the uploaded image and derived a confidence score based on learned patterns.",
-    "causes": [
-        "Genetic predisposition",
-        "Hormonal factors",
-        "Environmental exposure",
-    ],
-    "precautions": [
-        "Schedule regular screenings",
-        "Maintain healthy BMI and active lifestyle",
-        "Avoid smoking and limit alcohol intake",
-    ],
-    "actions": [
-        "Consult a specialist for follow-up",
-        "Consider further diagnostic imaging or biopsy",
-        "Track any new symptoms and report promptly",
-    ],
-    "faq": [
-        ("How accurate is this result?",
-         "Accuracy depends on image quality and training data; always confirm with a clinician."),
-        ("Does a Non-Cancerous result guarantee safety?",
-         "No. It reduces likelihood but clinical evaluation is essential."),
-        ("Can lifestyle change risk?",
-         "Yes. Diet, exercise, and avoiding smoking can reduce risk."),
-    ],
-}
 
-
-def build_analysis(prediction):
-    if prediction == "Cancerous":
-        return {
-            "summary": "The scan shows features that resemble cancerous patterns. Prioritize specialist review.",
-            "causes": [
-                "Genetic mutations (e.g., BRCA1/2)",
-                "Hormonal factors or dense breast tissue",
-                "Prior chest radiation exposure",
-            ],
-            "precautions": [
-                "Arrange diagnostic imaging or biopsy promptly",
-                "Consult an oncology or breast specialist",
-                "Gather prior imaging for comparison",
-            ],
-            "actions": [
-                "Book a specialist consultation",
-                "Prepare medical history and past scans",
-                "Follow recommended biopsy/pathology steps",
-            ],
-            "faq": ANALYSIS_DEFAULT["faq"],
-        }
-    if prediction == "Non-Cancerous":
-        return {
-            "summary": "The scan aligns with non-cancerous patterns. Continue routine monitoring.",
-            "causes": [
-                "Benign tissue changes or cysts",
-                "Hormonal variance or fibrocystic changes",
-                "Imaging artifacts or positioning",
-            ],
-            "precautions": [
-                "Maintain regular screening schedule",
-                "Monitor for new or changing symptoms",
-                "Keep a healthy lifestyle and follow clinician advice",
-            ],
-            "actions": [
-                "Follow standard follow-up interval advised by your clinician",
-                "Note any new breast changes and report promptly",
-                "Review results with your primary care or radiology team",
-            ],
-            "faq": ANALYSIS_DEFAULT["faq"],
-        }
-    return ANALYSIS_DEFAULT
-
-
-def store_result(result, analysis):
-    session["last_result"] = result
-    session["last_analysis"] = analysis
-
-
-def ensure_session_initialized():
-    if "total_scans" not in session:
-        session["total_scans"] = 0
-    # On a fresh website open, drop any lingering report while keeping last analysis.
-    if not session.get("initialized"):
-        session["initialized"] = True
-        session.pop("last_result", None)
+def store_result(data):
+    session["last_result"] = data
 
 
 @app.route("/", methods=["GET", "POST"])
 def dashboard():
-    ensure_session_initialized()
+    if "total_scans" not in session:
+        session["total_scans"] = 0
     result = session.get("last_result")
     return render_template(
         "dashboard.html",
@@ -181,7 +101,8 @@ def dashboard():
 
 @app.route("/report", methods=["GET", "POST"])
 def report():
-    ensure_session_initialized()
+    if "total_scans" not in session:
+        session["total_scans"] = 0
 
     if request.method == "POST":
         file = request.files.get("image")
@@ -206,19 +127,37 @@ def report():
                 "model_type": "RF on EfficientNet-B0 features",
                 "accuracy": "—",
             }
-            analysis = build_analysis(status)
-            store_result(result, analysis)
+            store_result(result)
             return redirect(url_for("report"))
 
     result = session.get("last_result")
-    analysis = session.get("last_analysis") or build_analysis(result["prediction"] if result else None)
-
+    analysis = {
+        "summary": "AI reviewed the uploaded image and derived a confidence score based on learned patterns.",
+        "causes": [
+            "Genetic predisposition",
+            "Hormonal factors",
+            "Environmental exposure",
+        ],
+        "precautions": [
+            "Schedule regular screenings",
+            "Maintain healthy BMI and active lifestyle",
+            "Avoid smoking and limit alcohol intake",
+        ],
+        "actions": [
+            "Consult a specialist for follow-up",
+            "Consider further diagnostic imaging or biopsy",
+            "Track any new symptoms and report promptly",
+        ],
+        "faq": [
+            ("How accurate is this result?",
+             "Accuracy depends on image quality and training data; always confirm with a clinician."),
+            ("Does a Non-Cancerous result guarantee safety?",
+             "No. It reduces likelihood but clinical evaluation is essential."),
+            ("Can lifestyle change risk?",
+             "Yes. Diet, exercise, and avoiding smoking can reduce risk."),
+        ],
+    }
     return render_template("report.html", result=result, analysis=analysis)
-
-
-@app.route("/about")
-def about():
-    return render_template("about.html")
 
 
 if __name__ == "__main__":

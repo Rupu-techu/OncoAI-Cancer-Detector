@@ -14,7 +14,7 @@
 <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
     <div class="container">
         <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="{{ url_for('dashboard') }}">
-            <span class="brand-mark me-2">◎</span>
+            <span class="brand-mark me-2">?</span>
             <span>Onco AI</span>
             <span class="ms-2 slogan text-muted">Every Life Matters</span>
         </a>
@@ -29,151 +29,138 @@
                 <li class="nav-item">
                     <a class="nav-link {% if request.path == '/report' %}active{% endif %}" href="{{ url_for('report') }}">Report</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{ url_for('about') }}">About</a>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container py-4">
-    <header class="d-flex align-items-center mb-4">
-        <div class="me-3 header-icon">
-            <i class="fa-solid fa-stethoscope"></i>
+<div class="container py-5 page-content">
+    <header class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="header-icon">
+                <i class="fa-solid fa-stethoscope"></i>
+            </div>
+            <div>
+                <h1 class="mb-1">OncoAI Dashboard</h1>
+                <p class="text-muted mb-0">AI-powered breast cancer detection • Every Life Matters</p>
+            </div>
         </div>
-        <div>
-            <h1 class="mb-0">Onco AI Dashboard</h1>
-            <p class="text-muted mb-0">Overview • FAQ • Quick stats</p>
-        </div>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('report') }}">
+            Start Analysis <i class="fa-solid fa-arrow-right ms-2"></i>
+        </a>
     </header>
 
     <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card shadow-soft mb-3">
+        <div class="col-lg-9 col-xl-10 d-flex flex-column gap-3">
+            <div class="card card-hero shadow-soft h-100">
+                <div class="card-body d-flex flex-column gap-3">
+                    <div>
+                        <p class="eyebrow mb-1">AI-Powered Breast Cancer Detection</p>
+                        <h4 class="mb-2">Clean, fast, and clinician-friendly</h4>
+                        <p class="text-muted mb-1">OncoAI is an AI-driven system designed to assist in early cancer detection. It processes medical images to deliver reliable predictions, along with confidence levels and risk estimation. The goal is to support faster and more informed healthcare decisions. It also provides simple guidance and insights to help users better understand the results.</p>
+                        <p class="text-danger small mb-0 d-flex align-items-center gap-2">⚠️ This is not a medical diagnosis. Always consult a qualified healthcare professional.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-soft w-100">
                 <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="fa-solid fa-circle-info me-2"></i>What is Onco AI?</h5>
-                    <p class="mb-2">Onco AI assists clinicians and researchers by screening breast histopathology images with deep CNN features and a classical Random Forest head. It highlights risk and provides structured guidance for follow-up.</p>
-                    <p class="mb-0 text-muted small">This is a clinical decision-support tool, not a final diagnostic device. Always pair results with professional medical judgment.</p>
-                </div>
-            </div>
-
-            <div class="row g-3 mb-3">
-                <div class="col-md-4">
-                    <div class="stat-card shadow-soft h-100">
-                        <p class="label mb-1"><i class="fa-solid fa-microchip me-1"></i>Model</p>
-                        <p class="value mb-1">EfficientNet-B0</p>
-                        <p class="text-muted small mb-0">Extracts deep image features, reduces them with principal component analysis, and classifies with a Random Forest.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card shadow-soft h-100">
-                        <p class="label mb-1"><i class="fa-solid fa-eye me-1"></i>Explainability</p>
-                        <p class="value mb-1">Feature-driven</p>
-                        <p class="text-muted small mb-0">Outputs confidence and risk; visual heatmaps (Grad-CAM) can be added to highlight regions of interest.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-card shadow-soft h-100">
-                        <p class="label mb-1"><i class="fa-solid fa-book-medical me-1"></i>Guidance</p>
-                        <p class="value mb-1">Curated notes</p>
-                        <p class="text-muted small mb-0">Retrieves causes, precautions, and suggested actions tailored to the predicted class.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-3">
-                <div class="col-lg-6">
-                    <div class="card shadow-soft h-100">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3"><i class="fa-solid fa-list-ol me-2"></i>How to Use</h5>
-                            <ol class="mb-0 ps-3">
-                                <li class="mb-2">Go to the <strong>Report</strong> tab.</li>
-                                <li class="mb-2">Upload a histopathology image (PNG/JPG/BMP).</li>
-                                <li class="mb-2">Review prediction, confidence, and risk meter.</li>
-                                <li class="mb-0">Read the guidance section and consult a clinician.</li>
-                            </ol>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">Prediction</p>
+                            <h4 class="mb-0">Last Result</h4>
                         </div>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('report') }}">View Report</a>
                     </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="card shadow-soft h-100">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3"><i class="fa-solid fa-question-circle me-2"></i>FAQ</h5>
-                            <div class="accordion" id="faqHome">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="h1">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c1">
-                                            How do I run an analysis?
-                                        </button>
-                                    </h2>
-                                    <div id="c1" class="accordion-collapse collapse" data-bs-parent="#faqHome">
-                                        <div class="accordion-body">Go to the Report page, upload an image, and submit. You’ll get prediction, confidence, and a risk meter.</div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="h2">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c2">
-                                            Is this a diagnostic tool?
-                                        </button>
-                                    </h2>
-                                    <div id="c2" class="accordion-collapse collapse" data-bs-parent="#faqHome">
-                                        <div class="accordion-body">No. It is for research and education and must be paired with clinical evaluation.</div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="h3">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c3">
-                                            What data does it use?
-                                        </button>
-                                    </h2>
-                                    <div id="c3" class="accordion-collapse collapse" data-bs-parent="#faqHome">
-                                        <div class="accordion-body">It extracts EfficientNet-B0 features from the uploaded histopathology image, then applies principal component analysis and a Random Forest.</div>
-                                    </div>
-                                </div>
+                    {% if result %}
+                    <div class="result-grid">
+                        <div>
+                            <p class="label">Prediction</p>
+                            <p class="display-6 mb-0">{{ result.prediction }}</p>
+                            <span class="badge {{ result.badge_class }} mt-1">{{ result.prediction }}</span>
+                        </div>
+                        <div>
+                            <p class="label">Confidence</p>
+                            <p class="h2 mb-0">{{ result.confidence }}%</p>
+                        </div>
+                        <div>
+                            <p class="label">Risk</p>
+                            <p class="h2 mb-1">{{ result.risk }}%</p>
+                            <div class="progress slim">
+                                <div class="progress-bar {% if result.prediction=='Cancerous' %}bg-danger{% else %}bg-success{% endif %}" style="width: {{ result.risk }}%;"></div>
                             </div>
                         </div>
                     </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No scans yet. Upload a mammography image to see results.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card shadow-soft mb-3">
+        <div class="col-lg-3 col-xl-2 d-flex flex-column gap-3">
+            <div class="card shadow-soft">
                 <div class="card-body">
-                    <h5 class="card-title mb-3"><i class="fa-solid fa-gauge-simple-high me-2"></i>Quick Stats</h5>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <div class="stat-card shadow-soft">
-                                <p class="label">Total Scans</p>
-                                <p class="value">{{ total_scans }}</p>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="stat-card shadow-soft">
-                                <p class="label">Model</p>
-                                <p class="value">{{ model_type }}</p>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <p class="eyebrow mb-0">Overview</p>
+                        <span class="icon-pill"><i class="fa-solid fa-gauge-simple-high"></i></span>
                     </div>
-                    <div class="mt-3">
-                        <a class="btn btn-primary w-100" href="{{ url_for('report') }}">
-                            Start Analysis <i class="fa-solid fa-arrow-right ms-2"></i>
-                        </a>
+                    <div class="stat-stack">
+                        <div class="stat-block">
+                            <p class="label mb-1">Total Scans</p>
+                            <p class="h5 mb-0 fw-bold">{{ total_scans }}</p>
+                        </div>
+                        <div class="stat-block">
+                            <p class="label mb-1">Model</p>
+                            <p class="mb-0 fw-semibold">EfficientNet-B0</p>
+                            <p class="text-muted small mb-0">+ Random Forest</p>
+                        </div>
+                        <div class="stat-block">
+                            <p class="label mb-1">Explainability</p>
+                            <p class="mb-0 fw-semibold">Feature-driven</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {% if result %}
-            <div class="card shadow-soft result-card">
+        </div>
+    </div>
+
+    <div class="row g-3 mt-3">
+        <div class="col-md-3">
+            <div class="card shadow-soft h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">Last Result</h6>
-                        <span class="badge {{ result.badge_class }}">{{ result.prediction }}</span>
-                    </div>
-                    <p class="mb-1 fw-semibold">{{ result.confidence }}% confidence</p>
-                    <p class="small text-muted mb-0">Risk: {{ result.risk }}%</p>
-                    <a class="btn btn-outline-primary btn-sm mt-2" href="{{ url_for('report') }}">View Report</a>
+                    <p class="label mb-1"><i class="fa-solid fa-bolt me-2 text-primary"></i>Early Detection</p>
+                    <p class="mb-0 text-muted small">Optimized for spotting concerning patterns early to support quicker clinical decisions.</p>
                 </div>
             </div>
-            {% endif %}
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-soft h-100">
+                <div class="card-body">
+                    <p class="label mb-1"><i class="fa-solid fa-robot me-2 text-primary"></i>AI-Powered</p>
+                    <p class="mb-0 text-muted small">EfficientNet-B0 features plus Random Forest for balanced accuracy and speed.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-soft h-100">
+                <div class="card-body">
+                    <p class="label mb-1"><i class="fa-solid fa-chart-simple me-2 text-primary"></i>Confidence & Risk</p>
+                    <p class="mb-0 text-muted small">Clear scores with a simple bar to gauge risk at a glance.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-soft h-100">
+                <div class="card-body">
+                    <p class="label mb-1"><i class="fa-solid fa-hand-holding-heart me-2 text-primary"></i>Guidance</p>
+                    <p class="mb-0 text-muted small">Concise follow-up actions and reminders to consult qualified clinicians.</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -183,7 +170,7 @@
     <div class="container">
         <div class="row g-3 align-items-center">
             <div class="col-md-4 d-flex align-items-center gap-2">
-                <span class="brand-mark">◎</span>
+                <span class="brand-mark">?</span>
                 <div>
                     <div class="fw-bold text-primary mb-1">Onco AI</div>
                     <div class="text-muted small">Every Life Matters</div>
