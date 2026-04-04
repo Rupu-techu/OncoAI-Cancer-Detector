@@ -52,7 +52,10 @@ OncoAI is a machine learning-based web application designed to assist in early c
 
 
 
-https://github.com/user-attachments/assets/bb45258a-3ba2-402d-8ed6-d07cc47073b5
+
+
+
+https://github.com/user-attachments/assets/ef9e4bc7-5d38-462b-8a4a-6c6f877f3fe9
 
 
 
