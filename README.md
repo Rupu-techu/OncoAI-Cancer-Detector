@@ -1,12 +1,12 @@
 # 🧠 OncoAI – Cancer Detection & Medical Insight System
 
-> AI-powered web application for cancer detection using medical images, enhanced with intelligent reporting and a modern doctor-style dashboard.
+> AI-powered web application for early-stage cancer detection using medical images, enhanced with intelligent reporting and a modern doctor-style dashboard.
 
 ---
 
 ## 🌐 Overview
 
-OncoAI is a machine learning-based web application designed to assist in early cancer detection using medical image analysis. It combines deep learning feature extraction with classical ML techniques to deliver accurate predictions along with user-friendly medical insights.
+OncoAI is a machine learning-based web application designed to assist in early breast-cancer detection using medical image analysis. It combines deep learning feature extraction with classical ML techniques to deliver accurate predictions along with user-friendly medical insights.
 
 ---
 
