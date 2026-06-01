@@ -10,11 +10,10 @@
 <body>
 <div class="page-bg"></div>
 
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
     <div class="container">
         <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="{{ url_for('dashboard') }}">
-            <span class="brand-mark me-2">?</span>
+            <span class="brand-mark me-2">O</span>
             <span>Onco AI</span>
             <span class="ms-2 slogan text-muted">Every Life Matters</span>
         </a>
@@ -45,7 +44,7 @@
             </div>
             <div>
                 <h1 class="mb-1">OncoAI Dashboard</h1>
-                <p class="text-muted mb-0">AI-powered breast cancer detection • Every Life Matters</p>
+                <p class="text-muted mb-0">AI-powered breast cancer detection - Every Life Matters</p>
             </div>
         </div>
         <a class="btn btn-primary btn-lg" href="{{ url_for('report') }}">
@@ -60,8 +59,8 @@
                     <div>
                         <p class="eyebrow mb-1">AI-Powered Breast Cancer Detection</p>
                         <h4 class="mb-2">Clean, fast, and clinician-friendly</h4>
-                        <p class="text-muted mb-1">OncoAI is an AI-driven system designed to assist in early cancer detection. It processes medical images to deliver reliable predictions, along with confidence levels and risk estimation. The goal is to support faster and more informed healthcare decisions. It also provides simple guidance and insights to help users better understand the results.</p>
-                        <p class="text-danger small mb-0 d-flex align-items-center gap-2">⚠️ This is not a medical diagnosis. Always consult a qualified healthcare professional.</p>
+                        <p class="text-muted mb-1">OncoAI is an AI-driven system designed to assist in early cancer detection. It processes medical images to deliver screening results, malignancy probability, and risk estimation. The goal is to support faster and more informed healthcare decisions. It also provides simple guidance and insights to help users better understand the results.</p>
+                        <p class="text-danger small mb-0 d-flex align-items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i> This is an AI-assisted screening summary. Always consult a qualified healthcare professional.</p>
                     </div>
                 </div>
             </div>
@@ -70,7 +69,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <p class="eyebrow mb-1">Prediction</p>
+                            <p class="eyebrow mb-1">AI Screening Result</p>
                             <h4 class="mb-0">Last Result</h4>
                         </div>
                         <a class="btn btn-outline-primary btn-sm" href="{{ url_for('report') }}">View Report</a>
@@ -78,24 +77,26 @@
                     {% if result %}
                     <div class="result-grid">
                         <div>
-                            <p class="label">Prediction</p>
-                            <p class="display-6 mb-0">{{ result.prediction }}</p>
-                            <span class="badge {{ result.badge_class }} mt-1">{{ result.prediction }}</span>
+                            <p class="label">Main Assessment</p>
+                            <p class="display-6 mb-0 {% if result.prediction == 'malignant' %}result-text-danger{% else %}result-text-success{% endif %}">
+                                {{ result.prediction_label }}
+                            </p>
+                            <span class="badge {{ result.prediction_accent_class }} mt-1">{{ result.prediction_label }}</span>
                         </div>
                         <div>
-                            <p class="label">Confidence</p>
-                            <p class="h2 mb-0">{{ result.confidence }}%</p>
+                            <p class="label">Malignancy Probability</p>
+                            <p class="h2 mb-0">{{ result.malignancy_probability }}%</p>
                         </div>
                         <div>
-                            <p class="label">Risk</p>
-                            <p class="h2 mb-1">{{ result.risk }}%</p>
+                            <p class="label">Risk Category</p>
+                            <span class="badge {{ result.risk_badge_class }} mb-2">{{ result.risk_category }}</span>
                             <div class="progress slim">
-                                <div class="progress-bar {% if result.prediction=='Cancerous' %}bg-danger{% else %}bg-success{% endif %}" style="width: {{ result.risk }}%;"></div>
+                                <div class="progress-bar {{ result.risk_badge_class }}" style="width: {{ result.malignancy_probability }}%;"></div>
                             </div>
                         </div>
                     </div>
                     {% else %}
-                    <p class="text-muted mb-0">No scans yet. Upload a mammography image to see results.</p>
+                    <p class="text-muted mb-0">No scans yet. Upload a histopathology image to see the screening result.</p>
                     {% endif %}
                 </div>
             </div>
@@ -125,7 +126,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -149,8 +149,8 @@
         <div class="col-md-3">
             <div class="card shadow-soft h-100">
                 <div class="card-body">
-                    <p class="label mb-1"><i class="fa-solid fa-chart-simple me-2 text-primary"></i>Confidence & Risk</p>
-                    <p class="mb-0 text-muted small">Clear scores with a simple bar to gauge risk at a glance.</p>
+                    <p class="label mb-1"><i class="fa-solid fa-chart-simple me-2 text-primary"></i>Probability & Risk</p>
+                    <p class="mb-0 text-muted small">Clear malignancy probability with a simple bar to gauge risk at a glance.</p>
                 </div>
             </div>
         </div>
@@ -170,7 +170,7 @@
     <div class="container">
         <div class="row g-3 align-items-center">
             <div class="col-md-4 d-flex align-items-center gap-2">
-                <span class="brand-mark">?</span>
+                <span class="brand-mark">O</span>
                 <div>
                     <div class="fw-bold text-primary mb-1">Onco AI</div>
                     <div class="text-muted small">Every Life Matters</div>
@@ -182,7 +182,7 @@
             </div>
             <div class="col-md-4 text-md-end">
                 <div class="text-muted small">Need help? Contact your clinical lead.</div>
-                <div class="text-muted small">© {{ 2026 }} Onco AI</div>
+                <div class="text-muted small">(c) {{ 2026 }} Onco AI</div>
             </div>
         </div>
         <div class="footer-bar mt-3"></div>

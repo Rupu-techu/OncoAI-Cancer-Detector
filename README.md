@@ -71,7 +71,7 @@ Random Forest Classifier
 
 ↓
 
-Prediction + Confidence
+AI Screening Result + Malignancy Probability
 
 ↓
 
