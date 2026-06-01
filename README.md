@@ -155,8 +155,6 @@ Dataset and trained model files are not included due to size limitations.
 
 🧠 Future Enhancements
 
-🔥 Grad-CAM visualization (Explainable AI)
-
 🧬 Multi-cancer detection (lung, skin, brain)
 
 📊 Severity prediction (Stage classification)
