@@ -131,6 +131,62 @@ h1, h2, h5, h6 {
 
 .big-result .display-6, .big-result .h1 { font-weight: 700; }
 
+.report-layout {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.report-left,
+.report-right {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+}
+
+.media-card {
+    overflow: hidden;
+}
+
+.media-frame {
+    width: 100%;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f8fbff, #eef5fb);
+    border: 1px solid rgba(31, 122, 191, 0.12);
+}
+
+.media-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    display: block;
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(13, 59, 102, 0.10);
+    background: #fff;
+}
+
+.media-empty {
+    min-height: 220px;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #5f6f86;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f8fbff, #eef5fb);
+    border: 1px dashed rgba(31, 122, 191, 0.18);
+}
+
+.media-empty i {
+    font-size: 2rem;
+    color: var(--primary);
+}
+
 .result-card {
     background:
         linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,251,255,0.96)),
@@ -588,6 +644,10 @@ input, select {
 
 @media (max-width: 768px) {
     .stat-card .value { font-size: 16px; }
+    .report-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
     .result-status,
     .risk-badge {
         width: 100%;
@@ -608,5 +668,11 @@ input, select {
     }
     .tech-item {
         padding: 12px 14px;
+    }
+    .media-frame {
+        padding: 0.75rem;
+    }
+    .media-image {
+        max-height: 300px;
     }
 }

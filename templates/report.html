@@ -39,8 +39,10 @@
             <div>
                 <p class="eyebrow mb-1">ONCOAI SCREENING REPORT</p>
                 <h1 class="mb-1">Screening Summary</h1>
-                <p class="text-muted mb-0">Date and Time: {{ result.analysis_date if result else 'Awaiting upload' }}</p>
-                <p class="text-muted mb-0">Analysis ID: {{ result.analysis_token if result else 'Pending' }}</p>
+                <div class="report-meta">
+                    <p class="text-muted mb-0">Date and Time: {{ result.analysis_date if result else 'Awaiting upload' }}</p>
+                    <p class="text-muted mb-0">Analysis ID: {{ result.analysis_token if result else 'Pending' }}</p>
+                </div>
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -53,46 +55,72 @@
         </div>
     </header>
 
-    <div class="row g-4">
-        <div class="col-lg-5 d-flex flex-column gap-3">
-            <div class="card shadow-soft h-100">
-                <div class="card-body">
-                    <p class="eyebrow mb-1">Primary</p>
-                    <h4 class="mb-3">Upload & Analyze</h4>
-                    <form id="upload-form" method="POST" enctype="multipart/form-data">
-                        <div id="drop-zone" class="drop-zone">
-                            <input type="file" name="image" id="image-input" accept="image/*" required>
-                            <p class="mb-1 fw-semibold">Drag & drop or click to select</p>
-                            <span class="text-muted small">Accepted: PNG, JPG, JPEG, BMP</span>
+    <div class="report-layout">
+        <section class="report-left">
+            <div class="card shadow-soft media-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">Uploaded Image</p>
+                            <h4 class="mb-0">Original Tissue Image</h4>
                         </div>
-                        <div class="d-flex align-items-center gap-3 mt-3">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fa-solid fa-microscope me-2"></i>Run Analysis
-                            </button>
-                            <div id="spinner" class="spinner-border text-primary d-none" role="status" style="width:2rem;height:2rem;">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                        <div class="preview mt-3">
-                            {% if result %}
-                            <div class="d-flex align-items-center mb-2 text-muted small">
-                                <i class="fa-regular fa-image me-2"></i>
-                                <span>Last uploaded image</span>
-                            </div>
-                            <img id="preview-img"
-                                 src="{{ url_for('static', filename='uploads/' + result.filename) }}"
-                                 alt="uploaded"
-                                 class="img-fluid rounded-4 shadow-sm">
-                            {% else %}
-                            <img id="preview-img" src="#" alt="preview" class="d-none img-fluid rounded-4 shadow-sm">
-                            {% endif %}
-                        </div>
-                    </form>
+                        <span class="badge result-badge-muted">Source</span>
+                    </div>
+                    {% if result %}
+                    <div class="media-frame">
+                        <img
+                            src="{{ url_for('static', filename='uploads/' + result.filename) }}"
+                            alt="Uploaded tissue image"
+                            class="media-image"
+                        >
+                    </div>
+                    {% else %}
+                    <div class="media-empty">
+                        <i class="fa-regular fa-image"></i>
+                        <p class="mb-0 mt-2 text-muted">Upload an image to preview it here.</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-7 d-flex flex-column gap-3">
+            <div class="card shadow-soft media-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">AI Highlighted Image</p>
+                            <h4 class="mb-0">Areas Reviewed by the AI</h4>
+                        </div>
+                        {% if result and result.analysis_date %}
+                        <span class="badge result-badge-muted">{{ result.analysis_date }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted small mb-3">The highlighted regions indicate image areas that had the greatest influence on the AI assessment.</p>
+                    {% if result %}
+                    <div class="media-frame">
+                        {% if result.gradcam_filename %}
+                        <img
+                            src="{{ url_for('static', filename='uploads/gradcam/' + result.gradcam_filename) }}"
+                            alt="AI highlighted image"
+                            class="media-image"
+                        >
+                        {% else %}
+                        <div class="media-empty">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            <p class="mb-0 mt-2 text-muted">Attention analysis could not be generated for this image.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="media-empty">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        <p class="mb-0 mt-2 text-muted">Upload an image to generate the AI-highlighted preview.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <aside class="report-right">
             <div class="card shadow-soft result-card">
                 <div class="card-body p-4 p-md-5">
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
@@ -171,57 +199,6 @@
                 </div>
             </div>
 
-            <div class="card shadow-soft attention-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                        <div>
-                            <p class="eyebrow mb-1">SECTION 3</p>
-                            <h5 class="card-title mb-2">Areas Reviewed by the AI</h5>
-                            <p class="text-muted mb-0 small">The highlighted regions indicate image areas that had the greatest influence on the AI assessment.</p>
-                        </div>
-                        {% if result and result.analysis_date %}
-                        <span class="badge result-badge-muted">{{ result.analysis_date }}</span>
-                        {% endif %}
-                    </div>
-
-                    {% if result %}
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="attention-panel h-100">
-                                <p class="label mb-2">Original Image</p>
-                                <div class="attention-media">
-                                    <img src="{{ url_for('static', filename='uploads/' + result.filename) }}"
-                                         alt="Original uploaded image"
-                                         class="img-fluid rounded-4">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="attention-panel h-100">
-                                <p class="label mb-2">AI Highlighted Image</p>
-                                <div class="attention-media">
-                                    {% if result.gradcam_filename %}
-                                    <img src="{{ url_for('static', filename='uploads/gradcam/' + result.gradcam_filename) }}"
-                                         alt="AI highlighted image"
-                                         class="img-fluid rounded-4">
-                                    {% else %}
-                                    <div class="attention-placeholder">
-                                        <i class="fa-solid fa-magnifying-glass-chart me-2"></i>
-                                        Attention analysis could not be generated for this image.
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="attention-empty">
-                        <p class="mb-0 text-muted">Upload an image to generate the original image and AI-highlighted areas review.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
             <div class="card shadow-soft explanation-card">
                 <div class="card-body p-4 p-md-5">
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
@@ -239,6 +216,26 @@
                     </ul>
                     {% else %}
                     <p class="text-muted mb-0">Recommended next steps will appear here after an image is analyzed.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-soft download-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">REPORT</p>
+                            <h5 class="card-title mb-0">Download PDF Report</h5>
+                        </div>
+                        <i class="fa-solid fa-file-pdf text-primary"></i>
+                    </div>
+                    {% if result and result.report_filename %}
+                    <a class="btn btn-primary w-100" href="{{ url_for('download_report', report_filename=result.report_filename) }}">
+                        <i class="fa-solid fa-download me-2"></i>Download PDF
+                    </a>
+                    {% else %}
+                    <button class="btn btn-primary w-100" type="button" disabled>Download PDF</button>
+                    <p class="text-muted small mb-0 mt-2">A PDF report becomes available after analysis.</p>
                     {% endif %}
                 </div>
             </div>
@@ -297,7 +294,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </aside>
     </div>
 </div>
 
@@ -334,21 +331,23 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
     };
 
-    dropZone.addEventListener("click", () => fileInput.click());
+    if (dropZone) {
+        dropZone.addEventListener("click", () => fileInput.click());
 
-    dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.classList.add("drag-active");
-    });
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("drag-active");
+        });
 
-    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-active"));
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-active"));
 
-    dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.classList.remove("drag-active");
-        const file = e.dataTransfer.files?.[0];
-        setFile(file);
-    });
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("drag-active");
+            const file = e.dataTransfer.files?.[0];
+            setFile(file);
+        });
+    }
 
     fileInput.addEventListener("change", () => setFile(fileInput.files?.[0]));
 
@@ -357,6 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+
 <footer class="footer mt-4 py-4">
     <div class="container">
         <div class="row g-3 align-items-center">
