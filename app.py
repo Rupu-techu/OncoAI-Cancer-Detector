@@ -2,11 +2,13 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
+import traceback
 
 import cv2
 import joblib
 import numpy as np
 import torch
+import torch.nn as nn
 from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
 from PIL import Image
 from reportlab.lib import colors
@@ -114,6 +116,16 @@ def calculate_evidence_level(probability_percent):
     return "Very Strong Evidence", "evidence-very-strong"
 
 
+def select_gradcam_target_layer(model):
+    last_conv = None
+    for module in model.modules():
+        if isinstance(module, nn.Conv2d):
+            last_conv = module
+    if last_conv is not None:
+        return last_conv
+    return model.features[-1]
+
+
 def build_patient_explanation(prediction):
     if prediction == "malignant":
         observed_text = (
@@ -172,32 +184,65 @@ def build_technical_appendix(probability_breakdown, risk_category):
 
 
 def build_cam_extractor():
-    target_layer = attention_model.features[-1]
+    target_layer = select_gradcam_target_layer(attention_model)
+    print(f"[GRADCAM] Selected target layer: {target_layer.__class__.__name__}")
     try:
         return SmoothGradCAMpp(attention_model, target_layer=target_layer)
-    except Exception:
+    except Exception as error:
+        print("[GRADCAM] SmoothGradCAM++ initialization failed, falling back to GradCAM")
+        print(error)
+        traceback.print_exc()
         return GradCAM(attention_model, target_layer=target_layer)
 
 
 def generate_gradcam_overlay(img_path, output_stem):
     pil_img = Image.open(img_path).convert("RGB")
-    input_tensor = preprocess(pil_img).unsqueeze(0).to(DEVICE)
+    input_tensor: torch.Tensor = preprocess(pil_img)
+    input_tensor = input_tensor.unsqueeze(0).to(DEVICE)
     extractor = build_cam_extractor()
 
     try:
+        print("[GRADCAM] Input shape:", input_tensor.shape)
         attention_model.zero_grad(set_to_none=True)
         scores = attention_model(input_tensor)
+        print("[GRADCAM] Scores shape:", scores.shape)
         class_idx = int(scores.argmax(dim=1).item())
-        cam = extractor(class_idx=class_idx, scores=scores)[0].detach().cpu().numpy()
+        print("[GRADCAM] Class index:", class_idx)
+        cam_output = extractor(class_idx=class_idx, scores=scores)
+        if isinstance(cam_output, (list, tuple)):
+            cam = cam_output[0]
+        else:
+            cam = cam_output
+        if isinstance(cam, (list, tuple)):
+            cam = cam[0]
+        if hasattr(cam, "detach"):
+            cam = cam.detach().cpu().numpy()
+        else:
+            cam = np.asarray(cam)
+        print("[GRADCAM] CAM shape:", cam.shape)
+        if cam.size == 0:
+            raise ValueError("Grad-CAM returned an empty map")
+        cam = np.squeeze(cam)
+        if cam.ndim != 2:
+            raise ValueError(f"Grad-CAM map must be 2D after squeeze, got shape {cam.shape}")
         cam = cam - cam.min()
-        if cam.max() > 0:
-            cam = cam / cam.max()
+        cam_max = cam.max()
+        if cam_max > 0:
+            cam = cam / cam_max
+        else:
+            raise ValueError("Grad-CAM map could not be normalized because max value is 0")
 
         heatmap = cv2.applyColorMap((cam * 255).astype(np.uint8), cv2.COLORMAP_JET)
         heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
         heatmap = cv2.resize(heatmap, pil_img.size)
         original = np.array(pil_img)
+        if heatmap.shape[:2] != original.shape[:2]:
+            raise ValueError(
+                f"Heatmap size mismatch: heatmap {heatmap.shape[:2]} vs original {original.shape[:2]}"
+            )
         overlay = cv2.addWeighted(original, 0.55, heatmap, 0.45, 0)
+        if overlay.size == 0:
+            raise ValueError("Generated Grad-CAM overlay is empty")
 
         gradcam_filename = f"{output_stem}_gradcam.png"
         gradcam_path = GRADCAM_FOLDER / gradcam_filename
@@ -512,7 +557,10 @@ def report():
             gradcam_filename = None
             try:
                 gradcam_filepath, gradcam_filename = generate_gradcam_overlay(filepath, analysis_token)
-            except Exception:
+            except Exception as error:
+                print("\nGRADCAM ERROR:")
+                print(error)
+                traceback.print_exc()
                 gradcam_filepath = None
                 gradcam_filename = None
 
