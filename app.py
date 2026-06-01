@@ -17,7 +17,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Image as RLImage
-from reportlab.platypus import Paragraph, PageBreak, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from torchcam.methods import GradCAM, SmoothGradCAMpp
 from torchvision import models, transforms
 from werkzeug.utils import secure_filename
@@ -129,32 +129,34 @@ def select_gradcam_target_layer(model):
 def build_patient_explanation(prediction):
     if prediction == "malignant":
         observed_text = (
-            "The uploaded image contains tissue patterns that are similar to samples previously identified "
-            "as malignant during model training."
+            "The AI identified image patterns that differ from those commonly observed in lower-risk samples. "
+            "These findings may warrant additional review by a healthcare professional."
         )
         reviewed_text = (
-            "The highlighted regions indicate image areas that had the greatest influence on the AI assessment."
+            "The highlighted regions indicate image areas that most influenced the AI assessment. These highlights "
+            "do not confirm disease and should be reviewed alongside clinical evaluation."
         )
         next_steps = [
-            "Seek medical consultation promptly",
-            "Consider additional clinical evaluation",
-            "Discuss findings with a qualified healthcare professional",
+            "Consult a healthcare professional.",
+            "Consider additional evaluation if recommended.",
+            "Continue monitoring according to medical advice.",
         ]
-        assessment = "Malignant Pattern Detected"
+        assessment = "Pattern Requiring Further Evaluation"
     else:
         observed_text = (
-            "The uploaded image contains tissue patterns that are more consistent with benign samples seen "
-            "during model training."
+            "The AI identified image patterns that are more consistent with lower-risk samples seen during model "
+            "training. Continued routine monitoring is recommended."
         )
         reviewed_text = (
-            "The highlighted regions indicate image areas that had the greatest influence on the AI assessment."
+            "The highlighted regions indicate image areas that most influenced the AI assessment. These highlights "
+            "do not confirm disease and should be reviewed alongside clinical evaluation."
         )
         next_steps = [
-            "Continue routine screening",
-            "Monitor changes over time",
-            "Consult a healthcare professional if symptoms are present",
+            "Continue routine screening.",
+            "Monitor for changes over time.",
+            "Seek medical advice if symptoms develop.",
         ]
-        assessment = "Benign Pattern Detected"
+        assessment = "No High-Risk Pattern Identified"
 
     return {
         "assessment": assessment,
@@ -166,19 +168,15 @@ def build_patient_explanation(prediction):
 
 def build_technical_appendix(probability_breakdown, risk_category):
     return {
-        "model_architecture": "EfficientNet-B0 + Random Forest",
-        "explainability": "SmoothGradCAM++ with Grad-CAM fallback",
-        "prediction_breakdown": {
-            "benign": probability_breakdown.get("benign", 0),
-            "malignant": probability_breakdown.get("malignant", 0),
-        },
-        "risk_assessment_method": (
-            f"Malignant probability is mapped to the risk categories used in the report. "
-            f"Current level of concern: {risk_category}."
+        "feature_extraction": "EfficientNet-B0",
+        "classification": "Random Forest",
+        "visual_explanation": "Grad-CAM",
+        "risk_summary": (
+            f"Malignant probability is mapped to the concern level shown in the report. Current level of concern: "
+            f"{risk_category}."
         ),
-        "dataset_information": (
-            "The model was trained on a binary breast tissue dataset prepared from labeled benign and malignant "
-            "histopathology images in the project workflow."
+        "image_review_note": (
+            "Highlighted regions show where the AI focused while reviewing the image."
         ),
     }
 
@@ -277,56 +275,74 @@ def generate_pdf_report(result, patient_explanation, technical_appendix, origina
         name="OncoTitle",
         parent=styles["Title"],
         textColor=colors.HexColor("#0d3b66"),
-        fontSize=22,
-        leading=26,
+        fontSize=21,
+        leading=24,
         alignment=TA_CENTER,
-        spaceAfter=8,
+        spaceAfter=6,
     ))
     styles.add(ParagraphStyle(
         name="OncoHeading",
         parent=styles["Heading2"],
         textColor=colors.HexColor("#0d3b66"),
-        fontSize=14,
-        leading=18,
-        spaceAfter=8,
+        fontSize=12.5,
+        leading=14.5,
+        spaceAfter=4,
     ))
     styles.add(ParagraphStyle(
         name="OncoBody",
         parent=styles["BodyText"],
-        fontSize=10,
-        leading=14,
+        fontSize=8.8,
+        leading=11.2,
         textColor=colors.HexColor("#24344d"),
     ))
     styles.add(ParagraphStyle(
         name="OncoSmall",
         parent=styles["BodyText"],
-        fontSize=8.5,
-        leading=12,
+        fontSize=7.5,
+        leading=9.5,
         textColor=colors.HexColor("#5f6f86"),
     ))
 
     doc = SimpleDocTemplate(
         str(pdf_path),
         pagesize=(8.27 * inch, 11.69 * inch),
-        leftMargin=0.55 * inch,
-        rightMargin=0.55 * inch,
-        topMargin=0.55 * inch,
-        bottomMargin=0.55 * inch,
+        leftMargin=0.40 * inch,
+        rightMargin=0.40 * inch,
+        topMargin=0.34 * inch,
+        bottomMargin=0.30 * inch,
     )
 
     story = []
     story.append(Paragraph("ONCOAI SCREENING REPORT", styles["OncoTitle"]))
-    story.append(Paragraph(f"Date and Time: {result['analysis_date']}", styles["OncoSmall"]))
-    story.append(Paragraph(f"Analysis ID: {result['analysis_token']}", styles["OncoSmall"]))
-    story.append(Spacer(1, 0.12 * inch))
+    meta_table = Table(
+        [[
+            Paragraph(f"Date & Time: {result['analysis_date']}", styles["OncoSmall"]),
+            Paragraph(f"Analysis ID: {result['analysis_token']}", styles["OncoSmall"]),
+        ]],
+        colWidths=[3.35 * inch, 3.35 * inch],
+    )
+    meta_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.white),
+        ("BOX", (0, 0), (-1, -1), 0.0, colors.white),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(meta_table)
+    story.append(Spacer(1, 0.08 * inch))
+
+    screening_result_text = (
+        "Pattern Requiring Further Evaluation" if result["prediction"] == "malignant"
+        else "No High-Risk Pattern Identified"
+    )
 
     summary_table = Table(
         [
-            ["AI Screening Result", result["prediction_label"]],
+            ["Screening Result", screening_result_text],
             ["Level of Concern", risk_badge_text(result["risk_badge_class"])],
-            ["Malignancy Probability", f"{result['malignancy_probability']}%"],
         ],
-        colWidths=[2.15 * inch, 4.45 * inch],
+        colWidths=[2.20 * inch, 4.50 * inch],
     )
     summary_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef5fb")),
@@ -340,111 +356,70 @@ def generate_pdf_report(result, patient_explanation, technical_appendix, origina
         ("PADDING", (0, 0), (-1, -1), 8),
     ]))
     story.append(summary_table)
-    story.append(Spacer(1, 0.18 * inch))
-
-    story.append(Paragraph("Screening Result", styles["OncoHeading"]))
-    story.append(Paragraph(f"Assessment: {patient_explanation['assessment']}", styles["OncoBody"]))
-    story.append(Paragraph(f"Level of Concern: {risk_badge_text(result['risk_badge_class'])}", styles["OncoBody"]))
     story.append(Spacer(1, 0.10 * inch))
 
-    breakdown_table = Table(
-        [
-            ["Malignant Probability", f"{result['probability_breakdown'].get('malignant', 0)}%"],
-            ["Benign Probability", f"{result['probability_breakdown'].get('benign', 0)}%"],
-        ],
-        colWidths=[2.15 * inch, 4.45 * inch],
-    )
-    breakdown_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef5fb")),
-        ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#24344d")),
-        ("BOX", (0, 0), (-1, -1), 0.75, colors.HexColor("#c9d9ea")),
-        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#dbe6f1")),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("PADDING", (0, 0), (-1, -1), 8),
-    ]))
-    story.append(breakdown_table)
-    story.append(Spacer(1, 0.18 * inch))
-
-    story.append(Paragraph("What the AI Observed", styles["OncoHeading"]))
+    story.append(Paragraph("Image Review", styles["OncoHeading"]))
     story.append(Paragraph(
-        patient_explanation["observed_text"],
+        "The highlighted regions indicate image areas that most influenced the AI assessment. These highlights do not confirm disease and should be reviewed alongside clinical evaluation.",
         styles["OncoBody"],
     ))
-    story.append(Spacer(1, 0.10 * inch))
+    story.append(Spacer(1, 0.04 * inch))
 
-    story.append(Paragraph("Areas Reviewed by the AI", styles["OncoHeading"]))
-    story.append(Paragraph(
-        "The highlighted regions indicate image areas that had the greatest influence on the AI assessment.",
-        styles["OncoBody"],
-    ))
-    story.append(Spacer(1, 0.08 * inch))
-
-    original_block = [Paragraph("Original Image", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
-                      pdf_image(original_image_path, 2.8 * inch, 2.3 * inch)]
+    original_block = [Paragraph("Original Image", styles["OncoSmall"]), Spacer(1, 0.03 * inch),
+                      pdf_image(original_image_path, 2.95 * inch, 2.15 * inch)]
     if gradcam_path and Path(gradcam_path).exists():
-        gradcam_block = [Paragraph("AI Highlighted Image", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
-                         pdf_image(gradcam_path, 2.8 * inch, 2.3 * inch)]
+        gradcam_block = [Paragraph("AI Highlighted Image", styles["OncoSmall"]), Spacer(1, 0.03 * inch),
+                         pdf_image(gradcam_path, 2.95 * inch, 2.15 * inch)]
     else:
-        gradcam_block = [Paragraph("AI Highlighted Image", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
+        gradcam_block = [Paragraph("AI Highlighted Image", styles["OncoSmall"]), Spacer(1, 0.03 * inch),
                          Paragraph("Attention analysis could not be generated for this image.", styles["OncoBody"])]
 
-    visuals = Table([[original_block, gradcam_block]], colWidths=[3.0 * inch, 3.0 * inch], hAlign="CENTER")
+    visuals = Table([[original_block, gradcam_block]], colWidths=[3.12 * inch, 3.12 * inch], hAlign="CENTER")
     visuals.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("BOX", (0, 0), (-1, -1), 0.75, colors.HexColor("#c9d9ea")),
         ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#dbe6f1")),
         ("BACKGROUND", (0, 0), (-1, -1), colors.white),
-        ("PADDING", (0, 0), (-1, -1), 8),
+        ("PADDING", (0, 0), (-1, -1), 4),
     ]))
     story.append(visuals)
-    story.append(Spacer(1, 0.18 * inch))
+    story.append(Spacer(1, 0.05 * inch))
 
-    story.append(Paragraph("What This Means", styles["OncoHeading"]))
-    story.append(Paragraph(patient_explanation["reviewed_text"], styles["OncoBody"]))
-    story.append(Spacer(1, 0.08 * inch))
+    story.append(Paragraph("What the AI Observed", styles["OncoHeading"]))
+    story.append(Paragraph(patient_explanation["observed_text"], styles["OncoBody"]))
+    story.append(Spacer(1, 0.04 * inch))
 
-    story.append(Paragraph("Recommended Next Steps", styles["OncoHeading"]))
+    story.append(Paragraph("Recommended Actions", styles["OncoHeading"]))
     for item in patient_explanation["next_steps"]:
         story.append(Paragraph(f"- {item}", styles["OncoBody"]))
-    story.append(Spacer(1, 0.12 * inch))
+    story.append(Spacer(1, 0.05 * inch))
 
     story.append(Paragraph("Important Notice", styles["OncoHeading"]))
     story.append(Paragraph(
-        "This system is an AI-assisted screening tool designed for educational and research purposes. Results are generated through image pattern analysis and should not be considered a medical interpretation. Always consult a qualified healthcare professional for clinical evaluation and treatment decisions.",
+        "This report is generated by an AI-assisted image screening system and is intended for educational and research purposes. It does not provide a medical diagnosis. Clinical decisions should always be made by qualified healthcare professionals.",
         styles["OncoBody"],
     ))
+    story.append(Spacer(1, 0.05 * inch))
 
-    story.append(PageBreak())
-    story.append(Paragraph("Technical Appendix", styles["OncoTitle"]))
-    story.append(Spacer(1, 0.10 * inch))
-    appendix_table = Table(
-        [
-            ["Model Architecture", technical_appendix["model_architecture"]],
-            ["Explainability", technical_appendix["explainability"]],
-            ["Prediction Breakdown", f"Benign: {technical_appendix['prediction_breakdown'].get('benign', 0)}% | Malignant: {technical_appendix['prediction_breakdown'].get('malignant', 0)}%"],
-            ["Risk Assessment Method", technical_appendix["risk_assessment_method"]],
-            ["Dataset Information", technical_appendix["dataset_information"]],
-        ],
-        colWidths=[1.9 * inch, 4.7 * inch],
+    footer_table = Table(
+        [[
+            Paragraph(
+                f"<b>AI System Information</b><br/>Feature Extraction: {technical_appendix['feature_extraction']}<br/>Classification: {technical_appendix['classification']}<br/>Visual Explanation: {technical_appendix['visual_explanation']}",
+                styles["OncoSmall"],
+            ),
+        ]],
+        colWidths=[6.55 * inch],
     )
-    appendix_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef5fb")),
-        ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#24344d")),
-        ("BOX", (0, 0), (-1, -1), 0.75, colors.HexColor("#c9d9ea")),
-        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#dbe6f1")),
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("LEADING", (0, 0), (-1, -1), 14),
-        ("ROWBACKGROUNDS", (0, 0), (-1, -1), [colors.white, colors.HexColor("#f8fbff")]),
-        ("PADDING", (0, 0), (-1, -1), 8),
+    footer_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f5f9fd")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#d7e3ef")),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
     ]))
-    story.append(appendix_table)
-    story.append(Spacer(1, 0.15 * inch))
-    story.append(Paragraph(
-        "This appendix is intended for researchers, recruiters, and technical reviewers who want a quick view of the model setup and explanation method.",
-        styles["OncoBody"],
-    ))
+    story.append(footer_table)
 
     doc.build(story)
     return report_filename
