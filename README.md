@@ -1,12 +1,12 @@
 # 🧠 OncoAI – Cancer Detection & Medical Insight System
 
-> AI-powered web application for cancer detection using medical images, enhanced with intelligent reporting and a modern doctor-style dashboard.
+> AI-powered web application for early-stage cancer detection using medical images, enhanced with intelligent reporting and a modern doctor-style dashboard.
 
 ---
 
 ## 🌐 Overview
 
-OncoAI is a machine learning-based web application designed to assist in early cancer detection using medical image analysis. It combines deep learning feature extraction with classical ML techniques to deliver accurate predictions along with user-friendly medical insights.
+OncoAI is a machine learning-based web application designed to assist in early breast-cancer detection using medical image analysis. It combines deep learning feature extraction with classical ML techniques to deliver accurate predictions along with user-friendly medical insights.
 
 ---
 
@@ -24,16 +24,27 @@ OncoAI is a machine learning-based web application designed to assist in early c
 
 ## 🖼️ Website Preview
 
-### 🔷 Dashboard
+###  Dashboard
+
+<img width="1919" height="926" alt="Screenshot 2026-04-04 010113" src="https://github.com/user-attachments/assets/9fd38bfe-8d50-4cef-8b75-5b2c46f0c4a6" />
 
 
-<img width="1919" height="1031" alt="Screenshot 2026-03-28 142750" src="https://github.com/user-attachments/assets/7fdf3a85-1c78-4b34-8d0f-45b1d7f23fd6" />
 
 ---
 
-### 📄 Report Page
+###  Report Page
 
-<img width="1919" height="872" alt="Screenshot 2026-03-28 142802" src="https://github.com/user-attachments/assets/0a19b222-f180-4c03-9fa4-30955d22ad44" />
+<img width="1919" height="930" alt="Screenshot 2026-04-04 010134" src="https://github.com/user-attachments/assets/4e240642-19a3-4d59-b947-b7afb2e86379" />
+
+
+---
+<img width="1915" height="930" alt="Screenshot 2026-04-04 003915" src="https://github.com/user-attachments/assets/49644a7b-a7ad-4104-9d00-fe2e80be2b72" />
+
+
+--- 
+###  About Page
+
+<img width="1919" height="927" alt="Screenshot 2026-04-04 004155" src="https://github.com/user-attachments/assets/06b3118d-d526-4d68-b976-60a7eb9442ae" />
 
 ---
 
@@ -41,7 +52,10 @@ OncoAI is a machine learning-based web application designed to assist in early c
 
 
 
-https://github.com/user-attachments/assets/bb45258a-3ba2-402d-8ed6-d07cc47073b5
+
+
+
+https://github.com/user-attachments/assets/ef9e4bc7-5d38-462b-8a4a-6c6f877f3fe9
 
 
 
