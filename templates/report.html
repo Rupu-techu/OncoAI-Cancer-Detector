@@ -116,155 +116,165 @@
     </section>
 
     {% if result %}
-    <div class="analysis-dashboard">
-        <div class="analysis-top-row">
-            <div class="card shadow-soft analysis-card analysis-image-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                        <div>
-                            <p class="eyebrow mb-1">Original Image</p>
-                            <h4 class="mb-0">Uploaded Tissue Image</h4>
-                        </div>
-                        <span class="badge result-badge-muted">Source</span>
+    <div class="report-grid">
+        <div class="card shadow-soft report-card original-image-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <p class="eyebrow mb-1">Original Image</p>
+                        <h4 class="mb-0">Uploaded Tissue Image</h4>
                     </div>
-                    <div class="media-frame">
-                        <img
-                            src="{{ url_for('static', filename='uploads/' + result.filename) }}"
-                            alt="Uploaded tissue image"
-                            class="media-image"
-                        >
-                    </div>
+                    <span class="badge result-badge-muted">Source</span>
+                </div>
+                <div class="media-frame image-preview-container">
+                    <img
+                        src="{{ url_for('static', filename='uploads/' + result.filename) }}"
+                        alt="Uploaded tissue image"
+                        class="media-image report-image"
+                    >
                 </div>
             </div>
+        </div>
 
-            <div class="analysis-right-stack">
-                <div class="card shadow-soft analysis-card">
-                    <div class="card-body p-4 p-md-5">
-                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                            <div>
-                                <p class="eyebrow mb-1">Screening Result</p>
-                                <h4 class="mb-0">Assessment Summary</h4>
-                            </div>
-                            <span class="badge result-status {{ result.prediction_accent_class }}">{{ result.prediction_label }}</span>
-                        </div>
-
-                        <div class="result-assessment">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="result-dot {{ result.prediction_accent_class }}"></span>
-                                <p class="label mb-0">Screening Result</p>
-                            </div>
-                            <h2 class="mb-2 {{ 'result-text-danger' if result.prediction == 'malignant' else 'result-text-success' }}">
-                                {{ result.prediction_label }}
-                            </h2>
-                            <div class="d-flex flex-wrap gap-2 mt-3">
-                                <span class="badge {{ result.risk_badge_class }}">{{ result.risk_category }}</span>
-                                <span class="badge result-badge-muted">Analysis ID: {{ result.analysis_token }}</span>
-                            </div>
-                        </div>
+        <div class="card shadow-soft report-card result-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <p class="eyebrow mb-1">Screening Result</p>
+                        <h4 class="mb-0">Assessment Summary</h4>
                     </div>
+                    <span class="badge result-status {{ result.prediction_accent_class }}">{{ result.prediction_label }}</span>
                 </div>
 
-                <div class="card shadow-soft analysis-card">
-                    <div class="card-body p-4 p-md-5">
-                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                <div class="result-assessment">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="result-dot {{ result.prediction_accent_class }}"></span>
+                        <p class="label mb-0">Screening Result</p>
+                    </div>
+                    <h2 class="result-hero-title mb-0 {{ 'result-text-danger' if result.prediction == 'malignant' else 'result-text-success' }}">
+                        {{ result.prediction_label }}
+                    </h2>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge {{ result.risk_badge_class }}">{{ result.risk_category }}</span>
+                        <span class="badge result-badge-muted">Analysis ID: {{ result.analysis_token }}</span>
+                    </div>
+
+                    <div class="probability-panel compact-meter">
+                        <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
                             <div>
-                                <p class="eyebrow mb-1">Level of Concern</p>
-                                <h4 class="mb-0">Risk Assessment</h4>
+                                <p class="label mb-1">Risk Meter</p>
+                                <p class="mb-0 fw-semibold">{{ result.malignancy_probability }}% AI Confidence</p>
                             </div>
                             <span class="badge risk-badge {{ result.risk_badge_class }}">{{ result.risk_category }}</span>
                         </div>
-
-                        <div class="probability-panel">
-                            <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
-                                <div>
-                                    <p class="label mb-1">Concern Level</p>
-                                    <p class="display-6 mb-0 fw-bold">{{ result.risk_category }}</p>
-                                </div>
-                                <span class="badge risk-badge {{ result.risk_badge_class }}">{{ result.risk_category }}</span>
-                            </div>
-                            <div class="progress probability-progress" data-width="{{ result.malignancy_probability }}">
-                                <div class="progress-bar {{ result.risk_badge_class }}"></div>
-                            </div>
-                            <div class="d-flex justify-content-between mt-2 small text-muted">
-                                <span>0%</span>
-                                <span>100%</span>
-                            </div>
+                        <div class="progress probability-progress" data-width="{{ result.malignancy_probability }}">
+                            <div class="progress-bar {{ result.risk_badge_class }}"></div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="card shadow-soft analysis-card">
-                    <div class="card-body p-4 p-md-5">
-                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                            <div>
-                                <p class="eyebrow mb-1">What This Result Means</p>
-                                <h4 class="mb-0">AI Explanation</h4>
-                            </div>
-                        </div>
-
-                        <div class="patient-message">
-                            <p class="mb-0">{{ result.explanation.observed_text }}</p>
+                        <div class="d-flex justify-content-between align-items-center gap-2 mt-2 small text-muted">
+                            <span>This AI model detected tissue patterns associated with malignant samples during analysis.</span>
+                            <span class="fw-semibold text-nowrap">{{ result.malignancy_probability }}%</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="analysis-bottom-row">
-            <div class="card shadow-soft analysis-card analysis-image-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                        <div>
-                            <p class="eyebrow mb-1">AI Highlighted Image</p>
-                            <h4 class="mb-0">Areas Reviewed by the AI</h4>
-                        </div>
-                        {% if result and result.analysis_date %}
-                        <span class="badge result-badge-muted">{{ result.analysis_date }}</span>
-                        {% endif %}
+        <div class="card shadow-soft report-card gradcam-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <p class="eyebrow mb-1">AI Highlighted Image</p>
+                        <h4 class="mb-0">Areas Reviewed by the AI</h4>
                     </div>
-                    <p class="text-muted small mb-3">The highlighted regions indicate image areas that had the greatest influence on the AI assessment.</p>
-                    {% if result.gradcam_filename %}
-                    <div class="media-frame">
-                        <img
-                            src="{{ url_for('static', filename='uploads/gradcam/' + result.gradcam_filename) }}"
-                            alt="AI highlighted image"
-                            class="media-image"
-                        >
-                    </div>
-                    {% else %}
-                    <div class="media-empty">
-                        <i class="fa-solid fa-magnifying-glass-chart"></i>
-                        <p class="mb-0 mt-2 text-muted">Attention analysis could not be generated for this image.</p>
-                    </div>
+                    {% if result and result.analysis_date %}
+                    <span class="badge result-badge-muted">{{ result.analysis_date }}</span>
                     {% endif %}
                 </div>
-            </div>
-
-            <div class="card shadow-soft analysis-card analysis-actions-card">
-                <div class="card-body p-4 p-md-5">
-                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
-                        <div>
-                            <p class="eyebrow mb-1">Recommended Actions</p>
-                            <h4 class="mb-0">Next Steps</h4>
-                        </div>
-                        <i class="fa-solid fa-clipboard-check text-primary"></i>
-                    </div>
-
-                    {% if result and result.explanation %}
-                    <div class="action-grid">
-                        {% for item in result.explanation.next_steps %}
-                        <div class="action-item">
-                            <i class="fa-solid fa-circle-check text-primary"></i>
-                            <p class="mb-0">{{ item }}</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
+                <p class="text-muted small mb-3">The highlighted regions indicate image areas that had the greatest influence on the AI assessment.</p>
+                {% if result.gradcam_filename %}
+                <div class="media-frame image-preview-container">
+                    <img
+                        src="{{ url_for('static', filename='uploads/gradcam/' + result.gradcam_filename) }}"
+                        alt="AI highlighted image"
+                        class="media-image report-image"
+                    >
                 </div>
+                {% else %}
+                <div class="media-empty">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    <p class="mb-0 mt-2 text-muted">Attention analysis could not be generated for this image.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        <div class="card shadow-soft analysis-wide-card disclaimer-card">
+        <div class="card shadow-soft report-card actions-card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <p class="eyebrow mb-1">Recommended Actions</p>
+                        <h4 class="mb-0">
+                            {% if result.prediction == 'malignant' %}
+                            Recommended Clinical Actions
+                            {% else %}
+                            Recommended Monitoring Steps
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <i class="fa-solid fa-clipboard-check text-primary"></i>
+                </div>
+
+                {% if result and result.prediction == 'malignant' %}
+                <div class="action-grid actions-list">
+                    <div class="action-item">
+                        <span class="action-step-index">1</span>
+                        <p class="mb-0">Schedule a diagnostic consultation with a healthcare professional for detailed evaluation.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">2</span>
+                        <p class="mb-0">Consider additional imaging or biopsy procedures if recommended by your clinician.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">3</span>
+                        <p class="mb-0">Compare current findings with previous mammography or pathology reports.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">4</span>
+                        <p class="mb-0">Monitor symptoms such as a persistent lump, pain, skin thickening, or discharge.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">5</span>
+                        <p class="mb-0">Maintain regular follow-up screenings and clinical observation.</p>
+                    </div>
+                </div>
+                {% elif result %}
+                <div class="action-grid actions-list">
+                    <div class="action-item">
+                        <span class="action-step-index">1</span>
+                        <p class="mb-0">Continue routine breast screening schedules as advised medically.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">2</span>
+                        <p class="mb-0">Monitor for noticeable physical changes or discomfort over time.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">3</span>
+                        <p class="mb-0">Maintain a healthy lifestyle and preventive care practices.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">4</span>
+                        <p class="mb-0">Preserve previous screening records for future comparison.</p>
+                    </div>
+                    <div class="action-item">
+                        <span class="action-step-index">5</span>
+                        <p class="mb-0">Consult a healthcare professional if symptoms newly appear.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-soft report-card full-width notice-card disclaimer-card">
             <div class="card-body p-4 p-md-5">
                 <div class="d-flex align-items-start gap-3">
                     <div class="disclaimer-icon">
@@ -286,7 +296,7 @@
             </div>
         </div>
 
-        <div class="card shadow-soft analysis-wide-card">
+        <div class="card shadow-soft report-card full-width technical-card">
             <div class="card-body p-4 p-md-5">
                 <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                     <div>
