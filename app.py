@@ -15,7 +15,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.platypus import Image as RLImage
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import Paragraph, PageBreak, SimpleDocTemplate, Spacer, Table, TableStyle
 from torchcam.methods import GradCAM, SmoothGradCAMpp
 from torchvision import models, transforms
 from werkzeug.utils import secure_filename
@@ -114,41 +114,60 @@ def calculate_evidence_level(probability_percent):
     return "Very Strong Evidence", "evidence-very-strong"
 
 
-def build_explanation(prediction, probability_breakdown, malignancy_probability_percent):
-    predicted_probability = probability_breakdown.get(prediction, malignancy_probability_percent)
-    evidence_level, evidence_badge_class = calculate_evidence_level(predicted_probability)
+def build_patient_explanation(prediction):
     if prediction == "malignant":
-        attention_summary = (
-            "The highlighted regions exhibit visual characteristics that were associated with malignant "
-            "samples during training."
+        observed_text = (
+            "The uploaded image contains tissue patterns that are similar to samples previously identified "
+            "as malignant during model training."
         )
-        reasoning = (
-            "The assessment is based on learned tissue-pattern similarities and should not be considered a "
-            "clinical interpretation."
+        reviewed_text = (
+            "The highlighted regions indicate image areas that had the greatest influence on the AI assessment."
         )
+        next_steps = [
+            "Seek medical consultation promptly",
+            "Consider additional clinical evaluation",
+            "Discuss findings with a qualified healthcare professional",
+        ]
         assessment = "Malignant Pattern Detected"
     else:
-        attention_summary = (
-            "The highlighted regions are more consistent with benign tissue patterns learned during training."
+        observed_text = (
+            "The uploaded image contains tissue patterns that are more consistent with benign samples seen "
+            "during model training."
         )
-        reasoning = (
-            "The assessment reflects learned tissue-pattern similarities and should not be considered a "
-            "clinical interpretation."
+        reviewed_text = (
+            "The highlighted regions indicate image areas that had the greatest influence on the AI assessment."
         )
+        next_steps = [
+            "Continue routine screening",
+            "Monitor changes over time",
+            "Consult a healthcare professional if symptoms are present",
+        ]
         assessment = "Benign Pattern Detected"
 
-    explanation_summary = (
-        f"{attention_summary} Prediction breakdown and evidence level are derived from the Random Forest "
-        f"probabilities. {reasoning}"
-    )
     return {
         "assessment": assessment,
-        "prediction_breakdown": probability_breakdown,
-        "evidence_level": evidence_level,
-        "evidence_badge_class": evidence_badge_class,
-        "attention_summary": attention_summary,
-        "reasoning": reasoning,
-        "explanation_summary": explanation_summary,
+        "observed_text": observed_text,
+        "reviewed_text": reviewed_text,
+        "next_steps": next_steps,
+    }
+
+
+def build_technical_appendix(probability_breakdown, risk_category):
+    return {
+        "model_architecture": "EfficientNet-B0 + Random Forest",
+        "explainability": "SmoothGradCAM++ with Grad-CAM fallback",
+        "prediction_breakdown": {
+            "benign": probability_breakdown.get("benign", 0),
+            "malignant": probability_breakdown.get("malignant", 0),
+        },
+        "risk_assessment_method": (
+            f"Malignant probability is mapped to the risk categories used in the report. "
+            f"Current level of concern: {risk_category}."
+        ),
+        "dataset_information": (
+            "The model was trained on a binary breast tissue dataset prepared from labeled benign and malignant "
+            "histopathology images in the project workflow."
+        ),
     }
 
 
@@ -204,7 +223,7 @@ def risk_badge_text(risk_class):
     }.get(risk_class, "Low Concern")
 
 
-def generate_pdf_report(result, analysis, explanation, original_image_path, gradcam_path):
+def generate_pdf_report(result, patient_explanation, technical_appendix, original_image_path, gradcam_path):
     report_filename = f"oncoai_report_{result['analysis_token']}.pdf"
     pdf_path = REPORTS_FOLDER / report_filename
 
@@ -251,16 +270,16 @@ def generate_pdf_report(result, analysis, explanation, original_image_path, grad
     )
 
     story = []
-    story.append(Paragraph("OncoAI", styles["OncoTitle"]))
-    story.append(Paragraph("AI Screening Report", styles["Heading2"]))
-    story.append(Paragraph(f"Analysis Date and Time: {result['analysis_date']}", styles["OncoSmall"]))
+    story.append(Paragraph("ONCOAI SCREENING REPORT", styles["OncoTitle"]))
+    story.append(Paragraph(f"Date and Time: {result['analysis_date']}", styles["OncoSmall"]))
+    story.append(Paragraph(f"Analysis ID: {result['analysis_token']}", styles["OncoSmall"]))
     story.append(Spacer(1, 0.12 * inch))
 
     summary_table = Table(
         [
             ["AI Screening Result", result["prediction_label"]],
+            ["Level of Concern", risk_badge_text(result["risk_badge_class"])],
             ["Malignancy Probability", f"{result['malignancy_probability']}%"],
-            ["Risk Category", risk_badge_text(result["risk_badge_class"])],
         ],
         colWidths=[2.15 * inch, 4.45 * inch],
     )
@@ -278,16 +297,15 @@ def generate_pdf_report(result, analysis, explanation, original_image_path, grad
     story.append(summary_table)
     story.append(Spacer(1, 0.18 * inch))
 
-    story.append(Paragraph("AI Explanation", styles["OncoHeading"]))
-    story.append(Paragraph(f"Assessment: {explanation['assessment']}", styles["OncoBody"]))
-    story.append(Paragraph(f"Evidence Level: {explanation['evidence_level']}", styles["OncoBody"]))
-    story.append(Paragraph(explanation["explanation_summary"], styles["OncoBody"]))
+    story.append(Paragraph("Screening Result", styles["OncoHeading"]))
+    story.append(Paragraph(f"Assessment: {patient_explanation['assessment']}", styles["OncoBody"]))
+    story.append(Paragraph(f"Level of Concern: {risk_badge_text(result['risk_badge_class'])}", styles["OncoBody"]))
     story.append(Spacer(1, 0.10 * inch))
 
     breakdown_table = Table(
         [
-            ["Malignant", f"{explanation['prediction_breakdown'].get('malignant', 0)}%"],
-            ["Benign", f"{explanation['prediction_breakdown'].get('benign', 0)}%"],
+            ["Malignant Probability", f"{result['probability_breakdown'].get('malignant', 0)}%"],
+            ["Benign Probability", f"{result['probability_breakdown'].get('benign', 0)}%"],
         ],
         colWidths=[2.15 * inch, 4.45 * inch],
     )
@@ -303,20 +321,27 @@ def generate_pdf_report(result, analysis, explanation, original_image_path, grad
     story.append(breakdown_table)
     story.append(Spacer(1, 0.18 * inch))
 
-    story.append(Paragraph("Model Attention Analysis", styles["OncoHeading"]))
+    story.append(Paragraph("What the AI Observed", styles["OncoHeading"]))
     story.append(Paragraph(
-        "The highlighted regions indicate image areas that contributed most strongly to the AI assessment.",
+        patient_explanation["observed_text"],
         styles["OncoBody"],
     ))
     story.append(Spacer(1, 0.10 * inch))
 
+    story.append(Paragraph("Areas Reviewed by the AI", styles["OncoHeading"]))
+    story.append(Paragraph(
+        "The highlighted regions indicate image areas that had the greatest influence on the AI assessment.",
+        styles["OncoBody"],
+    ))
+    story.append(Spacer(1, 0.08 * inch))
+
     original_block = [Paragraph("Original Image", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
                       pdf_image(original_image_path, 2.8 * inch, 2.3 * inch)]
     if gradcam_path and Path(gradcam_path).exists():
-        gradcam_block = [Paragraph("Grad-CAM Visualization", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
+        gradcam_block = [Paragraph("AI Highlighted Image", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
                          pdf_image(gradcam_path, 2.8 * inch, 2.3 * inch)]
     else:
-        gradcam_block = [Paragraph("Grad-CAM Visualization", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
+        gradcam_block = [Paragraph("AI Highlighted Image", styles["OncoSmall"]), Spacer(1, 0.05 * inch),
                          Paragraph("Attention analysis could not be generated for this image.", styles["OncoBody"])]
 
     visuals = Table([[original_block, gradcam_block]], colWidths=[3.0 * inch, 3.0 * inch], hAlign="CENTER")
@@ -330,18 +355,49 @@ def generate_pdf_report(result, analysis, explanation, original_image_path, grad
     story.append(visuals)
     story.append(Spacer(1, 0.18 * inch))
 
-    story.append(Paragraph("Recommendations", styles["OncoHeading"]))
-    for item in analysis.get("possible_findings", []):
-        story.append(Paragraph(f"- {item}", styles["OncoBody"]))
-    if analysis.get("possible_findings"):
-        story.append(Spacer(1, 0.06 * inch))
-    for item in analysis.get("recommendations", []):
+    story.append(Paragraph("What This Means", styles["OncoHeading"]))
+    story.append(Paragraph(patient_explanation["reviewed_text"], styles["OncoBody"]))
+    story.append(Spacer(1, 0.08 * inch))
+
+    story.append(Paragraph("Recommended Next Steps", styles["OncoHeading"]))
+    for item in patient_explanation["next_steps"]:
         story.append(Paragraph(f"- {item}", styles["OncoBody"]))
     story.append(Spacer(1, 0.12 * inch))
 
-    story.append(Paragraph("Medical Disclaimer", styles["OncoHeading"]))
+    story.append(Paragraph("Important Notice", styles["OncoHeading"]))
     story.append(Paragraph(
         "This system is an AI-assisted screening tool designed for educational and research purposes. Results are generated through image pattern analysis and should not be considered a medical interpretation. Always consult a qualified healthcare professional for clinical evaluation and treatment decisions.",
+        styles["OncoBody"],
+    ))
+
+    story.append(PageBreak())
+    story.append(Paragraph("Technical Appendix", styles["OncoTitle"]))
+    story.append(Spacer(1, 0.10 * inch))
+    appendix_table = Table(
+        [
+            ["Model Architecture", technical_appendix["model_architecture"]],
+            ["Explainability", technical_appendix["explainability"]],
+            ["Prediction Breakdown", f"Benign: {technical_appendix['prediction_breakdown'].get('benign', 0)}% | Malignant: {technical_appendix['prediction_breakdown'].get('malignant', 0)}%"],
+            ["Risk Assessment Method", technical_appendix["risk_assessment_method"]],
+            ["Dataset Information", technical_appendix["dataset_information"]],
+        ],
+        colWidths=[1.9 * inch, 4.7 * inch],
+    )
+    appendix_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef5fb")),
+        ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#24344d")),
+        ("BOX", (0, 0), (-1, -1), 0.75, colors.HexColor("#c9d9ea")),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#dbe6f1")),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("LEADING", (0, 0), (-1, -1), 14),
+        ("ROWBACKGROUNDS", (0, 0), (-1, -1), [colors.white, colors.HexColor("#f8fbff")]),
+        ("PADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(appendix_table)
+    story.append(Spacer(1, 0.15 * inch))
+    story.append(Paragraph(
+        "This appendix is intended for researchers, recruiters, and technical reviewers who want a quick view of the model setup and explanation method.",
         styles["OncoBody"],
     ))
 
@@ -444,10 +500,10 @@ def report():
             pred_label = pred_label.lower()
             is_malignant = pred_label == "malignant"
             risk_category, risk_badge_class = calculate_risk_category(round(malignancy_probability * 100, 2))
-            explanation = build_explanation(
-                pred_label,
+            patient_explanation = build_patient_explanation(pred_label)
+            technical_appendix = build_technical_appendix(
                 probability_breakdown,
-                round(malignancy_probability * 100, 2),
+                risk_category,
             )
             analysis_timestamp = datetime.now().strftime("%B %d, %Y %I:%M %p")
             analysis_token = uuid.uuid4().hex
@@ -475,14 +531,17 @@ def report():
                 "gradcam_filename": gradcam_filename,
                 "gradcam_filepath": gradcam_filepath,
                 "probability_breakdown": probability_breakdown,
+                "patient_explanation": patient_explanation,
+                "technical_appendix": technical_appendix,
                 "model_type": "RF on EfficientNet-B0 features",
                 "accuracy": "-",
             }
+            result["explanation"] = patient_explanation
+            result["technical_appendix"] = technical_appendix
             analysis = build_analysis(pred_label)
-            result["explanation"] = explanation
 
             try:
-                report_filename = generate_pdf_report(result, analysis, explanation, filepath, gradcam_filepath)
+                report_filename = generate_pdf_report(result, patient_explanation, technical_appendix, filepath, gradcam_filepath)
                 result["report_filename"] = report_filename
                 result["report_filepath"] = str((REPORTS_FOLDER / report_filename).relative_to(BASE_DIR))
             except Exception:

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Onco AI Report</title>
+    <title>ONCOAI Screening Report</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -37,9 +37,10 @@
                 <i class="fa-solid fa-heart-pulse"></i>
             </div>
             <div>
-                <p class="eyebrow mb-1">AI Screening Result</p>
-                <h1 class="mb-1">Breast Tissue Review</h1>
-                <p class="text-muted mb-0">Upload a histopathology image to view the AI-assisted screening result.</p>
+                <p class="eyebrow mb-1">ONCOAI SCREENING REPORT</p>
+                <h1 class="mb-1">Screening Summary</h1>
+                <p class="text-muted mb-0">Date and Time: {{ result.analysis_date if result else 'Awaiting upload' }}</p>
+                <p class="text-muted mb-0">Analysis ID: {{ result.analysis_token if result else 'Pending' }}</p>
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -97,7 +98,7 @@
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
                         <div>
                             <p class="eyebrow mb-1">AI Screening Result</p>
-                            <h4 class="mb-0">Clinical Summary</h4>
+                            <h4 class="mb-0">Screening Summary</h4>
                         </div>
                         {% if result %}
                         <span class="badge result-status {{ result.prediction_accent_class }}">{{ result.prediction_label }}</span>
@@ -111,12 +112,15 @@
                         <div class="result-assessment">
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <span class="result-dot {{ result.prediction_accent_class }}"></span>
-                                <p class="label mb-0">Main Assessment</p>
+                                <p class="label mb-0">Screening Result</p>
                             </div>
                             <h2 class="mb-2 {{ 'result-text-danger' if result.prediction == 'malignant' else 'result-text-success' }}">
                                 {{ result.prediction_label }}
                             </h2>
-                            <p class="text-muted mb-0">{{ analysis.summary }}</p>
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <span class="badge {{ result.risk_badge_class }}">{{ result.risk_category }}</span>
+                                <span class="badge result-badge-muted">Analysis ID: {{ result.analysis_token }}</span>
+                            </div>
                         </div>
 
                         <div class="probability-panel">
@@ -152,83 +156,18 @@
                 <div class="card-body p-4 p-md-5">
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                         <div>
-                            <p class="eyebrow mb-1">AI Explanation</p>
-                            <h5 class="card-title mb-0">Explainable AI Insights</h5>
+                            <p class="eyebrow mb-1">SECTION 2</p>
+                            <h5 class="card-title mb-0">What the AI Observed</h5>
                         </div>
-                        {% if result and result.explanation %}
-                        <span class="badge {{ result.explanation.evidence_badge_class }}">{{ result.explanation.evidence_level }}</span>
-                        {% endif %}
                     </div>
 
                     {% if result and result.explanation %}
-                    <div class="row g-3">
-                        <div class="col-lg-6">
-                            <div class="explanation-block h-100">
-                                <p class="label mb-2">Assessment</p>
-                                <div class="explanation-assessment {{ result.prediction_accent_class }}">
-                                    {{ result.explanation.assessment }}
-                                </div>
-                                <p class="label mt-3 mb-2">Prediction Breakdown</p>
-                                <div class="breakdown-stack">
-                                    <div class="breakdown-line">
-                                        <div class="d-flex justify-content-between small mb-1">
-                                            <span>Malignant</span>
-                                            <span>{{ result.explanation.prediction_breakdown.malignant }}%</span>
-                                        </div>
-                                        <div class="progress explanation-progress">
-                                            <div class="progress-bar risk-high" style="width: {{ result.explanation.prediction_breakdown.malignant }}%;"></div>
-                                        </div>
-                                    </div>
-                                    <div class="breakdown-line">
-                                        <div class="d-flex justify-content-between small mb-1">
-                                            <span>Benign</span>
-                                            <span>{{ result.explanation.prediction_breakdown.benign }}%</span>
-                                        </div>
-                                        <div class="progress explanation-progress">
-                                            <div class="progress-bar risk-low" style="width: {{ result.explanation.prediction_breakdown.benign }}%;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="explanation-block h-100">
-                                <p class="label mb-2">Attention Analysis Summary</p>
-                                <p class="text-muted mb-3 small">{{ result.explanation.attention_summary }}</p>
-                                <p class="label mb-2">Model Reasoning</p>
-                                <div class="model-reasoning">
-                                    {{ result.explanation.reasoning }}
-                                </div>
-                                <p class="label mt-3 mb-2">Explanation Summary</p>
-                                <p class="text-muted mb-0 small">{{ result.explanation.explanation_summary }}</p>
-                            </div>
-                        </div>
+                    <div class="patient-message">
+                        <p class="mb-0">{{ result.explanation.observed_text }}</p>
                     </div>
                     {% else %}
-                    <p class="text-muted mb-0">Upload an image to view the model explanation and prediction breakdown.</p>
+                    <p class="text-muted mb-0">Upload an image to view the screening summary.</p>
                     {% endif %}
-                </div>
-            </div>
-
-            <div class="card shadow-soft disclaimer-card">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="disclaimer-icon">
-                            <i class="fa-solid fa-circle-info"></i>
-                        </div>
-                        <div>
-                            <h5 class="card-title mb-2">Important Disclaimer</h5>
-                            <p class="mb-2 text-muted">
-                                This system is an AI-assisted screening tool designed for educational and research purposes.
-                            </p>
-                            <p class="mb-2 text-muted">
-                                Results are generated through image pattern analysis and should not be considered a medical interpretation.
-                            </p>
-                            <p class="mb-0 text-muted">
-                                Always consult a qualified healthcare professional for clinical evaluation and treatment decisions.
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -236,8 +175,9 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                         <div>
-                            <h5 class="card-title mb-2">Model Attention Analysis</h5>
-                            <p class="text-muted mb-0 small">The highlighted regions indicate image areas that contributed most strongly to the AI assessment.</p>
+                            <p class="eyebrow mb-1">SECTION 3</p>
+                            <h5 class="card-title mb-2">Areas Reviewed by the AI</h5>
+                            <p class="text-muted mb-0 small">The highlighted regions indicate image areas that had the greatest influence on the AI assessment.</p>
                         </div>
                         {% if result and result.analysis_date %}
                         <span class="badge result-badge-muted">{{ result.analysis_date }}</span>
@@ -258,15 +198,15 @@
                         </div>
                         <div class="col-md-6">
                             <div class="attention-panel h-100">
-                                <p class="label mb-2">Grad-CAM Visualization</p>
+                                <p class="label mb-2">AI Highlighted Image</p>
                                 <div class="attention-media">
                                     {% if result.gradcam_filename %}
                                     <img src="{{ url_for('static', filename='uploads/gradcam/' + result.gradcam_filename) }}"
-                                         alt="Grad-CAM overlay"
+                                         alt="AI highlighted image"
                                          class="img-fluid rounded-4">
                                     {% else %}
                                     <div class="attention-placeholder">
-                                        <i class="fa-solid fa-brain me-2"></i>
+                                        <i class="fa-solid fa-magnifying-glass-chart me-2"></i>
                                         Attention analysis could not be generated for this image.
                                     </div>
                                     {% endif %}
@@ -276,53 +216,85 @@
                     </div>
                     {% else %}
                     <div class="attention-empty">
-                        <p class="mb-0 text-muted">Upload an image to generate the original image and Grad-CAM attention analysis.</p>
+                        <p class="mb-0 text-muted">Upload an image to generate the original image and AI-highlighted areas review.</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="card shadow-soft">
-                <div class="card-body p-4">
-                    <h5 class="card-title mb-3">Recommendations</h5>
-                    {% if result %}
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="recommendation-panel h-100">
-                                <p class="label mb-2">Possible Findings</p>
-                                <ul class="mb-0 small text-muted ps-3">
-                                    {% for item in analysis.possible_findings %}
-                                    <li class="mb-2">{{ item }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="recommendation-panel h-100">
-                                <p class="label mb-2">Recommendations</p>
-                                <ul class="mb-0 small text-muted ps-3">
-                                    {% for item in analysis.recommendations %}
-                                    <li class="mb-2">{{ item }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
+            <div class="card shadow-soft explanation-card">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">SECTION 4</p>
+                            <h5 class="card-title mb-0">Recommended Next Steps</h5>
                         </div>
                     </div>
+
+                    {% if result and result.explanation %}
+                    <ul class="step-list mb-0 ps-3">
+                        {% for item in result.explanation.next_steps %}
+                        <li class="mb-2">{{ item }}</li>
+                        {% endfor %}
+                    </ul>
                     {% else %}
-                    <p class="text-muted mb-0">Recommendations will appear here after an image is analyzed.</p>
+                    <p class="text-muted mb-0">Recommended next steps will appear here after an image is analyzed.</p>
                     {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-soft disclaimer-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="disclaimer-icon">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-2">Important Notice</h5>
+                            <p class="mb-2 text-muted">
+                                This system is an AI-assisted screening tool designed for educational and research purposes.
+                            </p>
+                            <p class="mb-2 text-muted">
+                                Results are generated through image pattern analysis and should not be considered a medical diagnosis.
+                            </p>
+                            <p class="mb-0 text-muted">
+                                Always consult a qualified healthcare professional for clinical evaluation and treatment decisions.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="card shadow-soft">
                 <div class="card-body p-4">
-                    <h5 class="card-title mb-3">What is OncoAI?</h5>
-                    <p class="mb-2 text-muted small">
-                        OncoAI is an AI-powered breast tissue screening and risk assessment platform that analyzes histopathology images to identify benign and malignant tissue patterns.
-                    </p>
-                    <p class="mb-0 text-muted small">
-                        The system is intended to support educational, research, and screening workflows and should not replace professional medical judgment.
-                    </p>
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">TECHNICAL APPENDIX</p>
+                            <h5 class="card-title mb-0">For Researchers and Technical Reviewers</h5>
+                        </div>
+                    </div>
+                    <div class="technical-appendix">
+                        <div class="tech-item">
+                            <span class="label">Model Architecture</span>
+                            <p class="mb-0">EfficientNet-B0 + Random Forest</p>
+                        </div>
+                        <div class="tech-item">
+                            <span class="label">Explainability</span>
+                            <p class="mb-0">SmoothGradCAM++</p>
+                        </div>
+                        <div class="tech-item">
+                            <span class="label">Prediction Breakdown</span>
+                            <p class="mb-0">Benign: {{ result.technical_appendix.prediction_breakdown.benign if result and result.technical_appendix else '0' }}% | Malignant: {{ result.technical_appendix.prediction_breakdown.malignant if result and result.technical_appendix else '0' }}%</p>
+                        </div>
+                        <div class="tech-item">
+                            <span class="label">Risk Assessment Method</span>
+                            <p class="mb-0">Malignant probability is mapped to the report's concern levels.</p>
+                        </div>
+                        <div class="tech-item">
+                            <span class="label">Dataset Information</span>
+                            <p class="mb-0">Binary benign and malignant histopathology images prepared in the project workflow.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
