@@ -85,8 +85,13 @@ def run_inference(img_path):
     probs = rf_model.predict_proba(feats)[0]
     pred_idx = int(np.argmax(probs))
     prediction = idx_to_class[pred_idx]
-    malignancy_probability = float(probs[class_to_idx.get("malignant", pred_idx)])
-    return prediction, malignancy_probability
+    malignant_probability = float(probs[class_to_idx.get("malignant", pred_idx)])
+    benign_probability = float(probs[class_to_idx.get("benign", pred_idx)])
+    probability_breakdown = {
+        "malignant": round(malignant_probability * 100, 2),
+        "benign": round(benign_probability * 100, 2),
+    }
+    return prediction, malignant_probability, probability_breakdown
 
 
 def calculate_risk_category(malignancy_probability_percent):
@@ -97,6 +102,54 @@ def calculate_risk_category(malignancy_probability_percent):
     if malignancy_probability_percent <= 75:
         return "Moderate Concern", "risk-moderate"
     return "High Concern", "risk-high"
+
+
+def calculate_evidence_level(probability_percent):
+    if probability_percent <= 60:
+        return "Low Evidence", "evidence-low"
+    if probability_percent <= 75:
+        return "Moderate Evidence", "evidence-moderate"
+    if probability_percent <= 90:
+        return "Strong Evidence", "evidence-strong"
+    return "Very Strong Evidence", "evidence-very-strong"
+
+
+def build_explanation(prediction, probability_breakdown, malignancy_probability_percent):
+    predicted_probability = probability_breakdown.get(prediction, malignancy_probability_percent)
+    evidence_level, evidence_badge_class = calculate_evidence_level(predicted_probability)
+    if prediction == "malignant":
+        attention_summary = (
+            "The highlighted regions exhibit visual characteristics that were associated with malignant "
+            "samples during training."
+        )
+        reasoning = (
+            "The assessment is based on learned tissue-pattern similarities and should not be considered a "
+            "clinical interpretation."
+        )
+        assessment = "Malignant Pattern Detected"
+    else:
+        attention_summary = (
+            "The highlighted regions are more consistent with benign tissue patterns learned during training."
+        )
+        reasoning = (
+            "The assessment reflects learned tissue-pattern similarities and should not be considered a "
+            "clinical interpretation."
+        )
+        assessment = "Benign Pattern Detected"
+
+    explanation_summary = (
+        f"{attention_summary} Prediction breakdown and evidence level are derived from the Random Forest "
+        f"probabilities. {reasoning}"
+    )
+    return {
+        "assessment": assessment,
+        "prediction_breakdown": probability_breakdown,
+        "evidence_level": evidence_level,
+        "evidence_badge_class": evidence_badge_class,
+        "attention_summary": attention_summary,
+        "reasoning": reasoning,
+        "explanation_summary": explanation_summary,
+    }
 
 
 def build_cam_extractor():
@@ -151,7 +204,7 @@ def risk_badge_text(risk_class):
     }.get(risk_class, "Low Concern")
 
 
-def generate_pdf_report(result, analysis, original_image_path, gradcam_path):
+def generate_pdf_report(result, analysis, explanation, original_image_path, gradcam_path):
     report_filename = f"oncoai_report_{result['analysis_token']}.pdf"
     pdf_path = REPORTS_FOLDER / report_filename
 
@@ -223,6 +276,31 @@ def generate_pdf_report(result, analysis, original_image_path, gradcam_path):
         ("PADDING", (0, 0), (-1, -1), 8),
     ]))
     story.append(summary_table)
+    story.append(Spacer(1, 0.18 * inch))
+
+    story.append(Paragraph("AI Explanation", styles["OncoHeading"]))
+    story.append(Paragraph(f"Assessment: {explanation['assessment']}", styles["OncoBody"]))
+    story.append(Paragraph(f"Evidence Level: {explanation['evidence_level']}", styles["OncoBody"]))
+    story.append(Paragraph(explanation["explanation_summary"], styles["OncoBody"]))
+    story.append(Spacer(1, 0.10 * inch))
+
+    breakdown_table = Table(
+        [
+            ["Malignant", f"{explanation['prediction_breakdown'].get('malignant', 0)}%"],
+            ["Benign", f"{explanation['prediction_breakdown'].get('benign', 0)}%"],
+        ],
+        colWidths=[2.15 * inch, 4.45 * inch],
+    )
+    breakdown_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eef5fb")),
+        ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#24344d")),
+        ("BOX", (0, 0), (-1, -1), 0.75, colors.HexColor("#c9d9ea")),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#dbe6f1")),
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("PADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(breakdown_table)
     story.append(Spacer(1, 0.18 * inch))
 
     story.append(Paragraph("Model Attention Analysis", styles["OncoHeading"]))
@@ -362,10 +440,15 @@ def report():
             filepath = UPLOAD_FOLDER / filename
             file.save(filepath)
 
-            pred_label, malignancy_probability = run_inference(filepath)
+            pred_label, malignancy_probability, probability_breakdown = run_inference(filepath)
             pred_label = pred_label.lower()
             is_malignant = pred_label == "malignant"
             risk_category, risk_badge_class = calculate_risk_category(round(malignancy_probability * 100, 2))
+            explanation = build_explanation(
+                pred_label,
+                probability_breakdown,
+                round(malignancy_probability * 100, 2),
+            )
             analysis_timestamp = datetime.now().strftime("%B %d, %Y %I:%M %p")
             analysis_token = uuid.uuid4().hex
 
@@ -391,13 +474,15 @@ def report():
                 "analysis_token": analysis_token,
                 "gradcam_filename": gradcam_filename,
                 "gradcam_filepath": gradcam_filepath,
+                "probability_breakdown": probability_breakdown,
                 "model_type": "RF on EfficientNet-B0 features",
                 "accuracy": "-",
             }
             analysis = build_analysis(pred_label)
+            result["explanation"] = explanation
 
             try:
-                report_filename = generate_pdf_report(result, analysis, filepath, gradcam_filepath)
+                report_filename = generate_pdf_report(result, analysis, explanation, filepath, gradcam_filepath)
                 result["report_filename"] = report_filename
                 result["report_filepath"] = str((REPORTS_FOLDER / report_filename).relative_to(BASE_DIR))
             except Exception:

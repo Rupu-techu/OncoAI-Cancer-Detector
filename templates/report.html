@@ -148,6 +148,68 @@
                 </div>
             </div>
 
+            <div class="card shadow-soft explanation-card">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                        <div>
+                            <p class="eyebrow mb-1">AI Explanation</p>
+                            <h5 class="card-title mb-0">Explainable AI Insights</h5>
+                        </div>
+                        {% if result and result.explanation %}
+                        <span class="badge {{ result.explanation.evidence_badge_class }}">{{ result.explanation.evidence_level }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if result and result.explanation %}
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="explanation-block h-100">
+                                <p class="label mb-2">Assessment</p>
+                                <div class="explanation-assessment {{ result.prediction_accent_class }}">
+                                    {{ result.explanation.assessment }}
+                                </div>
+                                <p class="label mt-3 mb-2">Prediction Breakdown</p>
+                                <div class="breakdown-stack">
+                                    <div class="breakdown-line">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span>Malignant</span>
+                                            <span>{{ result.explanation.prediction_breakdown.malignant }}%</span>
+                                        </div>
+                                        <div class="progress explanation-progress">
+                                            <div class="progress-bar risk-high" style="width: {{ result.explanation.prediction_breakdown.malignant }}%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="breakdown-line">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span>Benign</span>
+                                            <span>{{ result.explanation.prediction_breakdown.benign }}%</span>
+                                        </div>
+                                        <div class="progress explanation-progress">
+                                            <div class="progress-bar risk-low" style="width: {{ result.explanation.prediction_breakdown.benign }}%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="explanation-block h-100">
+                                <p class="label mb-2">Attention Analysis Summary</p>
+                                <p class="text-muted mb-3 small">{{ result.explanation.attention_summary }}</p>
+                                <p class="label mb-2">Model Reasoning</p>
+                                <div class="model-reasoning">
+                                    {{ result.explanation.reasoning }}
+                                </div>
+                                <p class="label mt-3 mb-2">Explanation Summary</p>
+                                <p class="text-muted mb-0 small">{{ result.explanation.explanation_summary }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">Upload an image to view the model explanation and prediction breakdown.</p>
+                    {% endif %}
+                </div>
+            </div>
+
             <div class="card shadow-soft disclaimer-card">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
