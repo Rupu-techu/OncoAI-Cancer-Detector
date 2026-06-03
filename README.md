@@ -26,27 +26,33 @@ OncoAI is a machine learning-based web application designed to assist in early b
 
 ###  Dashboard
 
-<img width="1919" height="926" alt="Screenshot 2026-04-04 010113" src="https://github.com/user-attachments/assets/9fd38bfe-8d50-4cef-8b75-5b2c46f0c4a6" />
-
+<img width="1919" height="1079" alt="Screenshot 2026-06-03 090534" src="https://github.com/user-attachments/assets/064b8004-a8cb-44e8-bd10-9ff58d2004f8" />
 
 
 ---
 
 ###  Report Page
 
-<img width="1919" height="930" alt="Screenshot 2026-04-04 010134" src="https://github.com/user-attachments/assets/4e240642-19a3-4d59-b947-b7afb2e86379" />
+<img width="1919" height="1079" alt="Screenshot 2026-06-03 092058" src="https://github.com/user-attachments/assets/a2ae79a5-dfaf-4be0-8e3b-b3c682f2a09d" />
+
 
 
 ---
-<img width="1915" height="930" alt="Screenshot 2026-04-04 003915" src="https://github.com/user-attachments/assets/49644a7b-a7ad-4104-9d00-fe2e80be2b72" />
+<img width="1919" height="1079" alt="Screenshot 2026-06-03 091818" src="https://github.com/user-attachments/assets/9aac77b2-029b-411e-a9d8-8e5046411613" />
 
+---
+<img width="1918" height="1079" alt="Screenshot 2026-06-03 091842" src="https://github.com/user-attachments/assets/c7ef83bd-91c5-4e9f-ae08-af6772e59372" />
 
 --- 
 ###  About Page
 
-<img width="1919" height="927" alt="Screenshot 2026-04-04 004155" src="https://github.com/user-attachments/assets/06b3118d-d526-4d68-b976-60a7eb9442ae" />
+<img width="1919" height="1079" alt="Screenshot 2026-06-03 090534" src="https://github.com/user-attachments/assets/21d2d267-e54c-45cd-a7e0-18394851ce8a" />
 
 ---
+###  PDF report
+<img width="1919" height="1079" alt="Screenshot 2026-06-03 091227" src="https://github.com/user-attachments/assets/7376ca50-2bf2-44be-a179-88c34c3756f9" />
+
+--- 
 
 ## 🎥 Demo Video
 
