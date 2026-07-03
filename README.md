@@ -26,7 +26,8 @@ OncoAI is a machine learning-based web application designed to assist in early b
 
 ###  Dashboard
 
-<img width="1919" height="1079" alt="Screenshot 2026-06-03 090534" src="https://github.com/user-attachments/assets/064b8004-a8cb-44e8-bd10-9ff58d2004f8" />
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/25e53ff5-e7cf-4250-ba5b-c4a33b5b71fe" />
+
 
 
 ---
